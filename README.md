@@ -7,15 +7,11 @@ them into a database.
 ## Features
 
 - Instagram monitoring
-    - posts
-    - stories
-    - likes
-    - commands
-    - follower
-    - followings
+    - profiles (posts, stories, likes, etc)
 - SQLite Database
-    - several tables
+    - Tables: target, posts, stories, followings, followers)
 - User login
+    - session id
 
 
 ## Authors
@@ -31,4 +27,15 @@ Please note that this script is for theoretical purposes only and should not be 
 ## Libraries
 
 - [instagramy](https://github.com/yogeshwaran01/instagramy) 
-- and some more default libraries
+- os
+- uuid
+- sqlite3
+- datime
+
+
+## Soon
+SQLite: Tables - posts, stories, followings, followers
+Pictures are automatically downloaded
+More then one user login
+Chat Monitoring
+Storing retrograde data
