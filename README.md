@@ -34,8 +34,8 @@ Please note that this script is for theoretical purposes only and should not be 
 
 
 ## Soon
-SQLite: Tables - posts, stories, followings, followers
-Pictures are automatically downloaded
-More then one user login
-Chat Monitoring
-Storing retrograde data
+- SQLite: Tables - posts, stories, followings, followers
+- Pictures are automatically downloaded
+- More then one user login
+- Chat Monitoring
+- Storing retrograde data
