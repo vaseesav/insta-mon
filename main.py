@@ -2,7 +2,7 @@
     Python script to continuously monitor ones Instagram account.
     Saves data inside sqlite table.
     Early access version -- only handles main functionality.
-    V0.09 <--> 09.01.2023
+    V0.09 <--> 11.01.2023
 """
 
 import os
@@ -152,9 +152,13 @@ def parse_target_information(target_username, id):
 
     try:
         target = InstagramUser(target_username, from_cache=False, sessionid=id)
-        target_information = {'all': target.user_data, 'name': target.fullname, 'pictures': target.posts_display_urls,
-                              'bio': target.biography, 'posts': target.number_of_posts, 'follower': target.number_of_followers,
+
+        # 'all': target.user_data,
+        target_information = {'name': target.fullname, 'pictures': target.posts_display_urls,
+                              'bio': target.biography, 'posts': target.number_of_posts,
+                              'follower': target.number_of_followers,
                               'following': target.number_of_followings}
+
     except Exception as ee:
         print("Something went wrong during the parsing process.", ee)
         quit(-1)
@@ -164,29 +168,11 @@ def parse_target_information(target_username, id):
     return target_information
 
 
-def table_exists(cursor, table_name):
-    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'")
-
-    return not bool(cursor.fetchone())
-
-
-def db_connect():
-    """
-    Initiates the connection to the db.
-
-    :param: connect
-    :return: connect
-    """
-
-    try:
-        connect = sqlite3.connect(target_username + "-data.db")
-        cursor = connect.cursor()
-
-        return {"Cursor": cursor, "Connect": connect}
-
-    except sqlite3.Error as se:
-        print("Failed to connect to database.", se)
-        quit(-1)
+def table_exists(cursor, table_list):
+    for table_name in table_list:
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        if cursor.fetchone() is not None:
+            return True
 
 
 def db_create_target_data_table(cursor):
@@ -217,12 +203,7 @@ def db_create_target_data_table(cursor):
 
 def insert_into_targetdb(cursor):
     dt = datetime.now().timestamp()
-    real_name = target_information["name"]
-    bio = target_information["bio"]
-    post_counter = target_information["posts"]
-    follower = target_information["follower"]
-    following = target_information["following"]
-    data = (user_id, real_name, target_username, bio, post_counter, follower, following, dt)
+    data = (user_id, target_information["name"], target_username, target_information["bio"], target_information["posts"], target_information["follower"], target_information["following"], dt)
 
     try:
         cursor.execute('''
@@ -234,124 +215,16 @@ def insert_into_targetdb(cursor):
         print("An error occurred while inserting data into the database.", se)
 
 
-def db_create_posts_table(cursor):
-    """
-    Creates the db table that stores the targets posts.
-    :param cursor:
-    :return: Null
-    """
-
-    try:
-        cursor.execute('''
-        CREATE TABLE posts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            images BLOB,  
-            likes INTEGER,
-            comments INTEGER,
-            deleted BIT NOT NULL,
-            unix_delete TEXT,
-            unix_timestamp INTEGER NOT NULL    
-            );
-            ''')
-
-    except sqlite3.Error as se:
-        print("Failed to create database.", se)
-
-
-def insert_into_postsdb(cursor):
-    dt = datetime.now().timestamp()
-
-    data = (image, likes, comments, deleted, unix_delete, dt)
-
-    try:
-        cursor.execute('''
-        INSERT INTO target (image, likes, comments, deleted, unix_delete, unix_timestamp)
-        VALUES (?, ?, ?, ?, ?, ?)
-        ''', data)
-
-    except sqlite3.Error as se:
-        print("An error occurred while inserting data into the database.", se)
-
-
-def db_create_follower_table(cursor):
-    """
-    Creates the db table that stores the followers.
-    :param cursor:
-    :return: Null
-    """
-
-    try:
-        cursor.execute('''
-        CREATE TABLE follower (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            deleted BIT NOT NULL,
-            unix_delete TEXT,
-            unix_timestamp INTEGER NOT NULL    
-            );
-            ''')
-
-    except sqlite3.Error as se:
-        print("Failed to create database.", se)
-
-
-def db_create_following_table(cursor):
-    """
-    Creates the db table that stores the followings.
-    :param cursor:
-    :return: Null
-    """
-
-    try:
-        cursor.execute('''
-        CREATE TABLE following (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            deleted BIT NOT NULL,
-            unix_delete TEXT,
-            unix_timestamp INTEGER NOT NULL    
-            );
-            ''')
-
-    except sqlite3.Error as se:
-        print("Failed to create database.", se)
-
-
-def db_create_stories_table(cursor):
-    """
-    Creates the db table that stores the targets stories.
-    :param cursor:
-    :return: Null
-    """
-
-    try:
-        cursor.execute('''
-        CREATE TABLE stories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            images BLOB,  
-            deleted BIT NOT NULL,
-            unix_delete TEXT,
-            unix_timestamp INTEGER NOT NULL    
-            );
-            ''')
-
-    except sqlite3.Error as se:
-        print("Failed to create database.", se)
-
-
 def db_handler():
     try:
-        cursor = db_connect()["Cursor"]
-        connect = db_connect()["Connect"]
+        connect = sqlite3.connect(target_username + "-data.db")
+        cursor = connect.cursor()
         tables = ["target", "posts", "follower", "following", "stories"]
 
-        if not table_exists(cursor, tables in tables):
+        if not table_exists(cursor, tables):
             db_create_target_data_table(cursor)
-            db_create_stories_table(cursor)
-            db_create_posts_table(cursor)
-            db_create_following_table(cursor)
-            db_create_follower_table(cursor)
 
+        insert_into_targetdb(cursor)
         connect.commit()
 
     except sqlite3.Error as se:
