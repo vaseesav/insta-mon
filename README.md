@@ -33,6 +33,9 @@ Please note that this script is for theoretical purposes only and should not be 
 - datime
 
 
+## [Milestones](https://github.com/vaseesav/insta-mon/milestones)
+
+
 ## Soon
 - SQLite: Tables - posts, stories, followings, followers
 - Pictures are automatically downloaded
