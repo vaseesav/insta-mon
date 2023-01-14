@@ -1,7 +1,7 @@
 """
-    Python script to continuously monitor ones Instagram account.
-    Saves data inside sqlite table.
-    Early access version -- only handles main functionality.
+    Python script for tracking and recording activity of a single Instagram account.
+    Gathers posts, stories, likes, comments, followers, followings
+    and timestamps and writes them into a database.
     V0.09 <--> 11.01.2023
 """
 
@@ -142,6 +142,26 @@ def select_target():
         quit(-1)
 
 
+def create_filepath(directory: str, filename: str):
+    """
+    Create a file path by combining a directory and a filename
+
+    :param directory: the directory path
+    :param filename: the filename
+    :return: the full file path
+    """
+
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        filepath = os.path.join(directory, filename)
+
+        return filepath
+
+    except Exception as ee:
+        print("Something went  wrong creating a directory.", ee)
+
+
 def parse_target_information(target_username, id):
     """
     Gets the targets information from the Instagram API.
@@ -157,7 +177,8 @@ def parse_target_information(target_username, id):
         target_information = {'name': target.fullname, 'pictures': target.posts_display_urls,
                               'bio': target.biography, 'posts': target.number_of_posts,
                               'follower': target.number_of_followers,
-                              'following': target.number_of_followings}
+                              'following': target.number_of_followings,
+                              'profile': target.profile_picture_url}
 
     except Exception as ee:
         print("Something went wrong during the parsing process.", ee)
@@ -168,7 +189,25 @@ def parse_target_information(target_username, id):
     return target_information
 
 
+def download_profile_picture():
+    path = create_filepath("profilePictures", str(uuid.uuid1()) + ".png")
+    try:
+        download_profile_pic(username=target_username, sessionid=id, filepath=path)
+
+        return path
+
+    except Exception as ee:
+        print("Something went wrong downloading the profile picture", ee)
+        quit(-1)
+
+
 def table_exists(cursor, table_list):
+    """
+    Function to check if a table exists.
+
+    :return: True if the table exists, False otherwise
+    """
+
     for table_name in table_list:
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
         if cursor.fetchone() is not None:
@@ -178,6 +217,7 @@ def table_exists(cursor, table_list):
 def db_create_target_data_table(cursor):
     """
     Creates the db table that stores basic target information.
+
     :param cursor:
     :return: Null
     """
@@ -192,7 +232,8 @@ def db_create_target_data_table(cursor):
             bio TEXT,
             post_counter INTEGER,
             follower INTEGER,
-            following INTEGER, 
+            following INTEGER,
+            profile BLOB, 
             unix_timestamp INTEGER NOT NULL
         );
         ''')
@@ -202,13 +243,18 @@ def db_create_target_data_table(cursor):
 
 
 def insert_into_targetdb(cursor):
+    profile_picture = download_profile_picture()
+    with open(profile_picture, 'rb') as f:
+        image = f.read()
     dt = datetime.now().timestamp()
-    data = (user_id, target_information["name"], target_username, target_information["bio"], target_information["posts"], target_information["follower"], target_information["following"], dt)
+    data = (
+    user_id, target_information["name"], target_username, target_information["bio"], target_information["posts"],
+    target_information["follower"], target_information["following"], image, dt)
 
     try:
         cursor.execute('''
-        INSERT INTO target (target_id, name, username, bio, post_counter, follower, 'following', unix_timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO target (target_id, name, username, bio, post_counter, follower, 'following', profile, unix_timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', data)
 
     except sqlite3.Error as se:
@@ -216,6 +262,12 @@ def insert_into_targetdb(cursor):
 
 
 def db_handler():
+    """
+    Function to handle database creation and inserting.
+
+    :return: Null
+    """
+
     try:
         connect = sqlite3.connect(target_username + "-data.db")
         cursor = connect.cursor()
