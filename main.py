@@ -154,7 +154,10 @@ def create_filepath(directory: str, filename: str):
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
-        filepath = os.path.join(directory, filename)
+        if filename is not None:
+            filepath = os.path.join(directory, filename)
+        elif filename is None:
+            filepath = os.path.join(directory)
 
         return filepath
 
@@ -174,7 +177,7 @@ def parse_target_information(target_username, id):
         target = InstagramUser(target_username, from_cache=False, sessionid=id)
 
         # 'all': target.user_data,
-        target_information = {'name': target.fullname, 'pictures': target.posts_display_urls,
+        target_information = {'name': target.fullname, 'pictures': target.posts,
                               'bio': target.biography, 'posts': target.number_of_posts,
                               'follower': target.number_of_followers,
                               'following': target.number_of_followings,
@@ -190,7 +193,7 @@ def parse_target_information(target_username, id):
 
 
 def download_profile_picture():
-    path = create_filepath("profilePictures", str(uuid.uuid1()) + ".png")
+    path = create_filepath(target_username + "/profilePictures", str(uuid.uuid1()) + ".png")
     try:
         download_profile_pic(username=target_username, sessionid=id, filepath=path)
 
@@ -199,6 +202,8 @@ def download_profile_picture():
     except Exception as ee:
         print("Something went wrong downloading the profile picture", ee)
         quit(-1)
+    finally:
+        clear_caches()
 
 
 def table_exists(cursor, table_list):
@@ -219,7 +224,7 @@ def db_create_target_data_table(cursor):
     Creates the db table that stores basic target information.
 
     :param cursor:
-    :return: Null
+    :return: None
     """
 
     try:
@@ -233,6 +238,7 @@ def db_create_target_data_table(cursor):
             post_counter INTEGER,
             follower INTEGER,
             following INTEGER,
+            profile_path TEXT,
             profile BLOB, 
             unix_timestamp INTEGER NOT NULL
         );
@@ -243,41 +249,78 @@ def db_create_target_data_table(cursor):
 
 
 def insert_into_targetdb(cursor):
+    """
+    Function that inserts the data into the target table.
+
+    :param cursor:
+    :return: None
+    """
+
     profile_picture = download_profile_picture()
     with open(profile_picture, 'rb') as f:
         image = f.read()
     dt = datetime.now().timestamp()
     data = (
-    user_id, target_information["name"], target_username, target_information["bio"], target_information["posts"],
-    target_information["follower"], target_information["following"], image, dt)
+        user_id, target_information["name"], target_username, target_information["bio"], target_information["posts"],
+        target_information["follower"], target_information["following"], image, profile_picture, dt)
 
     try:
         cursor.execute('''
-        INSERT INTO target (target_id, name, username, bio, post_counter, follower, 'following', profile, unix_timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO target (target_id, name, username, bio, post_counter, follower, 'following', profile, profile_path, unix_timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', data)
 
     except sqlite3.Error as se:
         print("An error occurred while inserting data into the database.", se)
 
 
+def db_create_posts_table(cursor):
+    """
+    Creates the db table that stores every new image.
+
+    :param cursor:
+    :return None:
+    """
+
+    try:
+        cursor.execute('''
+        CREATE TABLE posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            caption TEXT,
+            location TEXT,
+            like_amount INTEGER,
+            likes TEXT,
+            comment_amount INTEGER,
+            comments TEXT,
+            image_path TEXT,
+            image BLOB, 
+            unix_timestamp INTEGER NOT NULL
+        );
+        ''')
+
+    except sqlite3.Error as se:
+        print("Failed to create database.", se)
+
+
 def db_handler():
     """
     Function to handle database creation and inserting.
 
-    :return: Null
+    :return: None
     """
 
     try:
-        connect = sqlite3.connect(target_username + "-data.db")
+        path = create_filepath(target_username, None)
+
+        connect = sqlite3.connect(path + "/data.db")
         cursor = connect.cursor()
         tables = ["target", "posts", "follower", "following", "stories"]
 
         if not table_exists(cursor, tables):
             db_create_target_data_table(cursor)
+            db_create_posts_table(cursor)
 
         insert_into_targetdb(cursor)
-        connect.commit()
 
     except sqlite3.Error as se:
         print("Something went wrong during db processes.", se)
@@ -286,6 +329,7 @@ def db_handler():
         print("Something went wrong during db processes.", ee)
         quit(-1)
     finally:
+        connect.commit()
         connect.close()
 
 
