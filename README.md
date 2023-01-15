@@ -30,7 +30,7 @@ Please note that this script is for theoretical purposes only and should not be 
 - os
 - uuid
 - sqlite3
-- datime
+- datetime
 
 
 ## [Milestones](https://github.com/vaseesav/insta-mon/milestones)
