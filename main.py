@@ -11,6 +11,7 @@ import json
 import sqlite3
 from datetime import datetime
 from instagramy import InstagramUser
+from instagramy.core.parser import Viewer
 from instagramy.plugins.download import *
 from instagramy.core.cache import clear_caches
 
@@ -181,7 +182,9 @@ def parse_target_information(target_username, id):
                               'bio': target.biography, 'posts': target.number_of_posts,
                               'follower': target.number_of_followers,
                               'following': target.number_of_followings,
-                              'profile': target.profile_picture_url}
+                              'profile': target.profile_picture_url,
+                              'is_private': target.is_private,
+                              'blocked': target.has_blocked_viewer}
 
     except Exception as ee:
         print("Something went wrong during the parsing process.", ee)
@@ -200,7 +203,21 @@ def download_profile_picture():
         return path
 
     except Exception as ee:
-        print("Something went wrong downloading the profile picture", ee)
+        print("Something went wrong downloading the profile picture.", ee)
+        quit(-1)
+    finally:
+        clear_caches()
+
+
+def download_posts(post_id):
+    path = create_filepath(target_username + "/Pictures", str(uuid.uuid1()) + ".png")
+    try:
+        download_post(id=post_id, sessionid=id, filepath=path)
+
+        return path
+
+    except Exception as ee:
+        print("Something went wrong downloading the posts.", ee)
         quit(-1)
     finally:
         clear_caches()
@@ -248,7 +265,7 @@ def db_create_target_data_table(cursor):
         print("Failed to create database.", se)
 
 
-def insert_into_targetdb(cursor):
+def insert_into_target_table(cursor):
     """
     Function that inserts the data into the target table.
 
@@ -294,12 +311,56 @@ def db_create_posts_table(cursor):
             comments TEXT,
             image_path TEXT,
             image BLOB, 
+            post_id INTEGER,
+            unix_post_date INTEGER,
             unix_timestamp INTEGER NOT NULL
         );
         ''')
 
     except sqlite3.Error as se:
         print("Failed to create database.", se)
+
+
+def insert_into_post_table(cursor):
+    """
+    Function that inserts the data into the posts table.
+
+    :param cursor:
+    :return: None
+    """
+    is_private = target_information['is_private']
+    is_blocked = target_information['blocked']
+
+    if is_private or is_blocked:
+        dt = datetime.now().timestamp()
+        like_amount = comment_amount = caption = unix_post_date = location = post_id = likes = comments = image_path = image = None
+
+    elif not is_private and not is_blocked:
+        dt = datetime.now().timestamp()
+        like_amount = target_information['pictures'][0][0]
+        comment_amount = target_information['pictures'][0][1]
+        caption = target_information['pictures'][0][2]
+        unix_post_date = target_information['pictures'][0][4]
+        location = target_information['pictures'][0][5]['name']
+        post_id = target_information['pictures'][0][6]
+        likes = None
+        comments = None
+        image_path = download_posts(post_id)
+
+        with open(image_path, 'rb') as f:
+            image = f.read()
+
+    data = (
+    caption, location, like_amount, likes, comment_amount, comments, image_path, image, post_id, unix_post_date, dt)
+
+    try:
+        cursor.execute('''
+        INSERT INTO posts (caption, location, like_amount, likes, comment_amount, comments, image_path, image, post_id, unix_post_date, unix_timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', data)
+
+    except sqlite3.Error as se:
+        print("An error occurred while inserting data into the database.", se)
 
 
 def db_handler():
@@ -320,7 +381,8 @@ def db_handler():
             db_create_target_data_table(cursor)
             db_create_posts_table(cursor)
 
-        insert_into_targetdb(cursor)
+        insert_into_target_table(cursor)
+        insert_into_post_table(cursor)
 
     except sqlite3.Error as se:
         print("Something went wrong during db processes.", se)
