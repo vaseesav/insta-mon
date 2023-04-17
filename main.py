@@ -2,7 +2,7 @@
     Python script for tracking and recording activity of a single Instagram account.
     Gathers posts, stories, likes, comments, followers, followings
     and timestamps and writes them into a database.
-    V0.09 <--> 11.01.2023
+    V0.09 <--> 11.01.2023?!
 """
 
 import os
