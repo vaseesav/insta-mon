@@ -74,6 +74,7 @@ class InstagramScraper:
             return profile_metadata
         except Exception as e:
             print("Something went wrong during the metadata request.", e)
+            quit(-1)
 
     def get_profile_picture_url(self):
         """
@@ -85,6 +86,7 @@ class InstagramScraper:
             return profile_picture
         except Exception as e:
             print("Something went wrong during the profile picture url request.", e)
+            quit(-1)
 
     def get_posts(self):
         """
@@ -97,6 +99,7 @@ class InstagramScraper:
                 return posts
         except Exception as e:
             print("Something went wrong during the get post request.", e)
+            quit(-1)
 
 
 class DataSorter:
@@ -105,9 +108,29 @@ class DataSorter:
         self.profile_posts = profile_posts
 
     def get_metadata(self):
-        pass
+        """
+        Function that gets the metadata and sorts it so that it can be inserted into the database.
+        :return: meta_data_sorted
+        """
+        try:
+            name = self.meta_data.full_name
+            username = self.meta_data.username
+            bio = self.meta_data.biography
+            is_private = self.meta_data.is_private
+            follower = self.meta_data.followers
+            followings = self.meta_data.followees
+            meta_data_sorted = [name, username, bio, is_private, follower, followings]
+
+            return meta_data_sorted
+        except Exception as e:
+            print("Something went wrong filtering the metadata.", e)
+            quit(-1)
 
     def get_posts(self):
+        """
+        Function that gets the posts and sorts the data so that it can be inserted into the database.
+        :return: profile_posts_sorted
+        """
         pass
 
 
@@ -132,8 +155,10 @@ class DbCreator:
                     return True
         except sqlite3.Error as se:
             print("Something went wrong fetching tables.", se)
+            quit(-1)
         except Exception as e:
             print("Something went wrong during the existence check of a table.", e)
+            quit(-1)
 
     def create_target_table(self):
         """
@@ -150,7 +175,7 @@ class DbCreator:
                 name TEXT NOT NULL,
                 username TEXT NOT NULL,
                 bio TEXT,
-                post_counter INTEGER,
+                is_private INTEGER,
                 follower INTEGER,
                 followings INTEGER,
                 profile_picture_path TEXT,
@@ -160,8 +185,10 @@ class DbCreator:
             ''')
         except sqlite3.Error as se:
             print("Something went wrong creating a table.", se)
+            quit(-1)
         except Exception as e:
             print("Something went wrong creating a table.", e)
+            quit(-1)
 
     def create_posts_table(self):
         """
@@ -189,8 +216,10 @@ class DbCreator:
             ''')
         except sqlite3.Error as se:
             print("Something went wrong creating a table.", se)
+            quit(-1)
         except Exception as e:
             print("Something went wrong creating a table.", e)
+            quit(-1)
 
     def create_db(self):
         """
@@ -203,8 +232,10 @@ class DbCreator:
                 self.create_posts_table()
         except sqlite3.Error as se:
             print("Something went wrong creating the tables.", se)
+            quit(-1)
         except Exception as e:
             print("Something went wrong creating the tables.", e)
+            quit(-1)
 
 
 class DbInserter:
