@@ -30,11 +30,19 @@ class InstaMon:
         instagram_scraper = InstagramScraper(target_username, user_login_details)
         db_creator = DbCreator(cursor, target_username)
 
-        instagram_scraper.get_metadata()
-        instagram_scraper.get_profile_picture_url()
-        instagram_scraper.get_posts()
+        meta_data = instagram_scraper.get_metadata()
+        profile_picture_url = instagram_scraper.get_profile_picture_url()
+        profile_posts = instagram_scraper.get_posts()
+
+        data_sorter = DataSorter(meta_data, profile_posts)
+
+        meta_data_sorted = data_sorter.get_metadata()
+        profile_posts_sorted = data_sorter.get_posts()
+
+        db_inserter = DbInserter(meta_data_sorted, profile_picture_url, profile_posts_sorted)
 
         db_creator.create_db()
+        db_inserter.insert_db()
 
 
 class SettingsInput:
@@ -89,6 +97,18 @@ class InstagramScraper:
                 return posts
         except Exception as e:
             print("Something went wrong during the get post request.", e)
+
+
+class DataSorter:
+    def __init__(self, meta_data, profile_posts):
+        self.meta_data = meta_data
+        self.profile_posts = profile_posts
+
+    def get_metadata(self):
+        pass
+
+    def get_posts(self):
+        pass
 
 
 class DbCreator:
@@ -185,6 +205,13 @@ class DbCreator:
             print("Something went wrong creating the tables.", se)
         except Exception as e:
             print("Something went wrong creating the tables.", e)
+
+
+class DbInserter:
+    def __int__(self, meta_data_sorted, profile_picture_url, profile_posts_sorted):
+        self.meta_data_sorted = meta_data_sorted
+        self.profile_picture_picture_url = profile_picture_url
+        self.profile_posts_sorted = profile_posts_sorted
 
 
 if __name__ == "__main__":
