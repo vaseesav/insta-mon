@@ -28,20 +28,20 @@ class InstaMon:
         connect = sqlite3.connect(target_username + "-data.db")
         cursor = connect.cursor()
 
-        instagram_scraper = InstagramScraper(target_username, user_login_details)
-        db_creator = DbCreator(connect, cursor, target_username)
+        table_list = ["target", "posts"]
+        db_creator = DbCreator(connect, cursor, target_username, table_list)
+        db_creator.create_db()
 
+        instagram_scraper = InstagramScraper(target_username, user_login_details)
         meta_data = instagram_scraper.get_metadata()
         profile_picture_url = instagram_scraper.get_profile_picture_url()
         profile_posts = instagram_scraper.get_posts()
+        instagram_scraper.get_profile_picture()
 
         data_sorter = DataSorter(meta_data, profile_posts)
-
         meta_data_sorted = data_sorter.get_metadata()
 
         db_inserter = DbInserter(connect, cursor, meta_data_sorted)
-
-        db_creator.create_db()
         db_inserter.insert_target_table()
 
 
@@ -101,6 +101,17 @@ class InstagramScraper:
             print("Something went wrong during the get post request.", e)
             quit(-1)
 
+    def get_profile_picture(self):
+        """
+        Function that downloads the profile picture.
+        :return: files
+        """
+        profile = self.profile
+        try:
+            self.bot.download_profilepic_if_new(profile, None)
+        except Exception as e:
+            print("Something went wrong during the profile picture download request.", e)
+
 
 class DataSorter:
     def __init__(self, meta_data, profile_posts):
@@ -133,22 +144,23 @@ class DataSorter:
         TODO: Filter data, add function to get new posts
         :return: profile_posts_sorted
         """
-        #caption
-        #location
-        #like_amount
-        #likes
-        #comment_amount
-        #comments
-        #image
-        #unix_post_date
+        # caption
+        # location
+        # like_amount
+        # likes
+        # comment_amount
+        # comments
+        # image
+        # unix_post_date
         return None
 
 
 class DbCreator:
-    def __init__(self, connect, cursor, target_username):
+    def __init__(self, connect, cursor, target_username, table_list):
         self.connect = connect
         self.cursor = cursor
         self.target_username = target_username
+        self.table_list = table_list
 
     def table_exists(self):
         """
@@ -156,11 +168,10 @@ class DbCreator:
         :return: Boolean
         """
         cursor = self.cursor
-        table_list = ["target", "posts"]
         query = "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
 
         try:
-            for table_name in table_list:
+            for table_name in self.table_list:
                 cursor.execute(query, (table_name,))
                 if cursor.fetchone() is not None:
                     return True
