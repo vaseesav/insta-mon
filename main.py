@@ -8,6 +8,7 @@
     V0.10 <--> 17.04.2023
 """
 from datetime import datetime
+from pathlib import Path
 
 import instaloader
 import sqlite3
@@ -104,11 +105,13 @@ class InstagramScraper:
     def get_profile_picture(self):
         """
         Function that downloads the profile picture.
-        :return: files
+        :return: None
         """
-        profile = self.profile
         try:
-            self.bot.download_profilepic_if_new(profile, None)
+            profile = self.profile
+            picture_url = self.get_profile_picture_url()
+            path = Path(self.target.lower() + '/profile_picture')
+            self.bot.download_title_pic(picture_url, path, 'profile_pic', profile)
         except Exception as e:
             print("Something went wrong during the profile picture download request.", e)
 
