@@ -7,6 +7,7 @@
 
     V0.10 <--> 17.04.2023
 """
+from datetime import datetime
 
 import instaloader
 import sqlite3
@@ -28,7 +29,7 @@ class InstaMon:
         cursor = connect.cursor()
 
         instagram_scraper = InstagramScraper(target_username, user_login_details)
-        db_creator = DbCreator(cursor, target_username)
+        db_creator = DbCreator(connect, cursor, target_username)
 
         meta_data = instagram_scraper.get_metadata()
         profile_picture_url = instagram_scraper.get_profile_picture_url()
@@ -37,12 +38,11 @@ class InstaMon:
         data_sorter = DataSorter(meta_data, profile_posts)
 
         meta_data_sorted = data_sorter.get_metadata()
-        profile_posts_sorted = data_sorter.get_posts()
 
-        db_inserter = DbInserter(meta_data_sorted, profile_picture_url, profile_posts_sorted)
+        db_inserter = DbInserter(connect, cursor, meta_data_sorted)
 
         db_creator.create_db()
-        db_inserter.insert_db()
+        db_inserter.insert_target_table()
 
 
 class SettingsInput:
@@ -117,9 +117,10 @@ class DataSorter:
             username = self.meta_data.username
             bio = self.meta_data.biography
             is_private = self.meta_data.is_private
+            post_amount = self.profile_posts.count
             follower = self.meta_data.followers
             followings = self.meta_data.followees
-            meta_data_sorted = [name, username, bio, is_private, follower, followings]
+            meta_data_sorted = [name, username, bio, is_private, post_amount, follower, followings]
 
             return meta_data_sorted
         except Exception as e:
@@ -129,13 +130,23 @@ class DataSorter:
     def get_posts(self):
         """
         Function that gets the posts and sorts the data so that it can be inserted into the database.
+        TODO: Filter data, add function to get new posts
         :return: profile_posts_sorted
         """
-        pass
+        #caption
+        #location
+        #like_amount
+        #likes
+        #comment_amount
+        #comments
+        #image
+        #unix_post_date
+        return None
 
 
 class DbCreator:
-    def __init__(self, cursor, target_username):
+    def __init__(self, connect, cursor, target_username):
+        self.connect = connect
         self.cursor = cursor
         self.target_username = target_username
 
@@ -171,16 +182,14 @@ class DbCreator:
             cursor.execute('''
             CREATE TABLE target (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                target_id TEXT KEY,
                 name TEXT NOT NULL,
                 username TEXT NOT NULL,
                 bio TEXT,
                 is_private INTEGER,
+                post_amount INTEGER,
                 follower INTEGER,
                 followings INTEGER,
-                profile_picture_path TEXT,
-                profile BLOB, 
-                unix_timestamp INTEGER NOT NULL
+                unix_time INTEGER NOT NULL
             );
             ''')
         except sqlite3.Error as se:
@@ -211,7 +220,7 @@ class DbCreator:
                 image BLOB, 
                 post_id INTEGER,
                 unix_post_date INTEGER,
-                unix_timestamp INTEGER NOT NULL
+                unix_time INTEGER NOT NULL
             );
             ''')
         except sqlite3.Error as se:
@@ -236,13 +245,40 @@ class DbCreator:
         except Exception as e:
             print("Something went wrong creating the tables.", e)
             quit(-1)
+        finally:
+            self.connect.commit()
 
 
 class DbInserter:
-    def __int__(self, meta_data_sorted, profile_picture_url, profile_posts_sorted):
+    def __init__(self, connect, cursor, meta_data_sorted):
+        self.connect = connect
+        self.cursor = cursor
         self.meta_data_sorted = meta_data_sorted
-        self.profile_picture_picture_url = profile_picture_url
-        self.profile_posts_sorted = profile_posts_sorted
+
+    def insert_target_table(self):
+        """
+        Function that inserts the sorted data into the target table.
+        :return: None
+        """
+        meta_data = self.meta_data_sorted
+        unix_timestamp = datetime.now().timestamp()
+        meta_data.extend([unix_timestamp])
+
+        try:
+            self.cursor.execute('''
+            INSERT INTO target (name, username, bio, is_private, post_amount, follower, 'followings', unix_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', meta_data)
+
+        except sqlite3.Error as se:
+            print("Something went wrong inserting data into the target table.", se)
+            quit(-1)
+        except Exception as e:
+            print("Something went wrong inserting data into the target table.", e)
+            quit(-1)
+        finally:
+            self.connect.commit()
+            self.connect.close()
 
 
 if __name__ == "__main__":
