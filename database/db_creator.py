@@ -14,6 +14,7 @@ class DbCreator:
         """
         self.create_target_table()
         self.create_posts_table()
+        self.db_handler.connection.commit()
 
     def table_exists(self, table_name):
         """
