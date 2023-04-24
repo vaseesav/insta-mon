@@ -1,5 +1,5 @@
 import sqlite3
-from logger.logger_handler import LoggingHandler
+
 from database.db_handler import DbHandler
 
 
@@ -7,7 +7,6 @@ class DbCreator:
     def __init__(self, db_name):
         self.db_name = db_name
         self.db_handler = DbHandler(db_name)
-        self.logger = LoggingHandler(self.__class__.__name__).logger
 
     def create_tables(self):
         """
@@ -28,15 +27,12 @@ class DbCreator:
         try:
             cursor.execute(query, (table_name,))
             if cursor.fetchone() is not None:
-                self.logger.info("Table {} exists.".format(table_name))
                 return True
         except sqlite3.Error as se:
             print("An error occurred while checking for tables.", se)
-            self.logger.warning('An error occurred while checking for tables.', se)
             quit(-1)
         except Exception as e:
             print("An error occurred while checking for tables.", e)
-            self.logger.warning('An error occurred while checking for tables.', e)
             quit(-1)
 
     def create_target_table(self):
@@ -44,12 +40,11 @@ class DbCreator:
         Function which creates the target table.
         """
         try:
-            cursor = self.db_handler.cursor
             if self.table_exists("target"):
                 pass
             else:
-                self.logger.info("Creating target table.")
-                cursor.execute('''
+                cur = self.db_handler.cursor
+                cur.execute('''
                 CREATE TABLE target (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
@@ -64,11 +59,9 @@ class DbCreator:
                 ''')
         except sqlite3.Error as se:
             print("An error occurred while creating the target table.", se)
-            self.logger.critical('An error occurred while creating the target table.', se)
             quit(-1)
         except Exception as e:
             print("An error occurred while creating the target table.", e)
-            self.logger.critical('An error occurred while creating the target table.', e)
             quit(-1)
         finally:
             self.db_handler.connection.commit()
@@ -79,7 +72,6 @@ class DbCreator:
             if self.table_exists("posts"):
                 pass
             else:
-                self.logger.info("Creating posts table.")
                 cursor.execute('''
                 CREATE TABLE posts (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,11 +90,9 @@ class DbCreator:
                 ''')
         except sqlite3.Error as se:
             print("An error occurred while creating the posts table.", se)
-            self.logger.critical('An error occurred while creating the posts table.', se)
             quit(-1)
         except Exception as e:
             print("An error occurred while creating the posts table.", e)
-            self.logger.critical('An error occurred while creating the posts table.', e)
             quit(-1)
         finally:
             self.db_handler.connection.commit()

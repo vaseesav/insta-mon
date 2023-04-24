@@ -1,6 +1,7 @@
 class DataSorter:
-    def __init__(self, metadata):
+    def __init__(self, metadata, user_post_data):
         self.metadata = metadata
+        self.user_post_data = user_post_data
 
     def get_metadata(self):
         """
@@ -16,11 +17,12 @@ class DataSorter:
         """
         try:
             metadata = self.metadata
+            post_data = self.user_post_data
             name = metadata.full_name
             username = metadata.username
             bio = metadata.biography
             is_private = metadata.is_private
-            post_amount = metadata.posts.count
+            post_amount = post_data.count
             follower = metadata.followers
             followings = metadata.followees
             metadata_sorted = [name, username, bio, is_private, post_amount, follower, followings]
