@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from instagram.instagram_handler import InstagramHandler
 
 
@@ -31,7 +33,18 @@ class InstagramScraper:
             quit(-1)
 
     def get_profile_picture(self):
-        pass
+        """
+        Function that downloads and saves the profile picture of a user.
+        """
+        try:
+            profile = self.instagram_handler.profile
+            picture_url = self.get_profile_picture_url()
+            target_name = self.target_name
+            path = Path(target_name + '/profile_pictures')
+            self.instagram_handler.bot.download_title_pic(picture_url, path, 'profile_picture', profile)
+        except Exception as e:
+            print("An error occurred while downloading or saving the profile picture.", e)
+            quit(-1)
 
     def get_posts(self):
         pass
