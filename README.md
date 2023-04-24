@@ -1,6 +1,6 @@
 # insta-mon
 Python script for tracking and recording activity of a single Instagram account. 
-Gathers posts, stories, likes, comments, followers, followings, and timestamps and writes 
+Gathers user data, posts, stories, likes, comments, followers, followings, and timestamps and writes 
 them into a database.
 
 
@@ -11,7 +11,7 @@ them into a database.
 - SQLite Database
     - Tables: target, posts, stories, followings, followers)
 - User login
-    - session id
+    - soon
 
 
 ## Authors
@@ -26,11 +26,7 @@ Please note that this script is for theoretical purposes only and should not be 
 
 ## Libraries
 
-- [instagramy](https://github.com/yogeshwaran01/instagramy) 
-- os
-- uuid
-- sqlite3
-- datetime
+- [instaloader](https://github.com/instaloader/instaloader) 
 
 
 ## [Milestones](https://github.com/vaseesav/insta-mon/milestones)
@@ -38,7 +34,5 @@ Please note that this script is for theoretical purposes only and should not be 
 
 ## Soon
 - SQLite: Tables - posts, stories, followings, followers
-- Pictures are automatically downloaded
-- More then one user login
-- Chat Monitoring
-- Storing retrograde data
+- logging 
+- param target selection
