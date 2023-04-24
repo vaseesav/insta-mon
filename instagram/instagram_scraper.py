@@ -19,7 +19,16 @@ class InstagramScraper:
             quit(-1)
 
     def get_profile_picture_url(self):
-        pass
+        """
+        Function that scraps the profile picture url of a user.
+        :return: profile_picture_url
+        """
+        try:
+            profile_picture_url = self.instagram_handler.profile.get_profile_pic_url()
+            return profile_picture_url
+        except Exception as e:
+            print("An error occurred while getting the profile picture url.", e)
+            quit(-1)
 
     def get_profile_picture(self):
         pass
