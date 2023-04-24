@@ -12,7 +12,8 @@ class InstaMon:
         self.db_creator = DbCreator(self.db_name)
         self.instagram_scraper = InstagramScraper(self.target_name)
         self.meta_data = self.instagram_scraper.get_metadata()
-        self.data_sorter = DataSorter(self.meta_data)
+        self.user_posts_data = self.instagram_scraper.get_posts()
+        self.data_sorter = DataSorter(self.meta_data, self.user_posts_data)
         self.meta_data_sorted = self.data_sorter.get_metadata()
         self.db_inserter = DbInserter(self.db_name, self.meta_data_sorted)
 

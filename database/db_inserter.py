@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import datetime
-from db_handler import DbHandler
+from database.db_handler import DbHandler
 
 
 class DbInserter:
@@ -15,18 +15,16 @@ class DbInserter:
         """
         self.insert_target_table()
         self.insert_posts_table()
-        self.db_handler.connection.commit()
 
     def insert_target_table(self):
         """
         Function that inserts the target data into the target table.
         """
-        cursor = self.db_handler.cursor()
-        meta_data = self.meta_data_sorted
-        unix_timestamp = datetime.now().timestamp()
-        meta_data.extend([unix_timestamp])
-
         try:
+            cursor = self.db_handler.cursor
+            meta_data = self.meta_data_sorted
+            unix_timestamp = datetime.now().timestamp()
+            meta_data.extend([unix_timestamp])
             cursor.execute('''
             INSERT INTO target (name, username, bio, is_private, post_amount, follower, 'followings', unix_time)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -37,6 +35,8 @@ class DbInserter:
         except Exception as e:
             print("An error occurred while inserting data into target table.", e)
             quit(-1)
+        finally:
+            self.db_handler.connection.commit()
 
     def insert_posts_table(self):
         """
