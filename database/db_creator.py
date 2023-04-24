@@ -1,6 +1,6 @@
 import sqlite3
 
-from db_handler import DbHandler
+from database.db_handler import DbHandler
 
 
 class DbCreator:
@@ -14,7 +14,6 @@ class DbCreator:
         """
         self.create_target_table()
         self.create_posts_table()
-        self.db_handler.connection.commit()
 
     def table_exists(self, table_name):
         """
@@ -22,7 +21,7 @@ class DbCreator:
         :param table_name:
         :return: Boolean
         """
-        cursor = self.db_handler.cursor()
+        cursor = self.db_handler.cursor
         query = "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
 
         try:
@@ -40,13 +39,12 @@ class DbCreator:
         """
         Function which creates the target table.
         """
-        cursor = self.db_handler.cursor()
-
         try:
             if self.table_exists("target"):
                 pass
             else:
-                cursor.execute('''
+                cur = self.db_handler.cursor
+                cur.execute('''
                 CREATE TABLE target (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
@@ -65,11 +63,12 @@ class DbCreator:
         except Exception as e:
             print("An error occurred while creating the target table.", e)
             quit(-1)
+        finally:
+            self.db_handler.connection.commit()
 
     def create_posts_table(self):
-        cursor = self.db_handler.cursor()
-
         try:
+            cursor = self.db_handler.cursor
             if self.table_exists("posts"):
                 pass
             else:
@@ -95,3 +94,5 @@ class DbCreator:
         except Exception as e:
             print("An error occurred while creating the posts table.", e)
             quit(-1)
+        finally:
+            self.db_handler.connection.commit()

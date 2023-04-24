@@ -1,12 +1,11 @@
 from pathlib import Path
-
 from instagram.instagram_handler import InstagramHandler
 
 
 class InstagramScraper:
-    def __int__(self, target_name):
+    def __init__(self, target_name):
         self.target_name = target_name
-        self.instagram_handler = InstagramHandler()
+        self.instagram_handler = InstagramHandler(target_name)
 
     def get_metadata(self):
         """
@@ -47,4 +46,13 @@ class InstagramScraper:
             quit(-1)
 
     def get_posts(self):
-        pass
+        """
+        Function that scraps the posts of a user.
+        :return: posts
+        """
+        try:
+            posts = self.instagram_handler.profile.get_posts()
+            return posts
+        except Exception as e:
+            print("An error occurred while getting posts.", e)
+            quit(-1)
