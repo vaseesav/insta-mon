@@ -59,7 +59,7 @@ class DbCreator:
                     post_amount INTEGER,
                     follower INTEGER,
                     followings INTEGER,
-                    profile_picture BLOB.
+                    profile_picture BLOB,
                     profile_picture_path TEXT,
                     unix_time INTEGER NOT NULL
                 );
