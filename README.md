@@ -13,6 +13,9 @@ them into a database.
 - User login
     - soon
 
+## Usage
+To run the script, you will have to parse the target username as an arguement. 
+"python3 main.py -t username" or "python3 main.py --target username"
 
 ## Authors
 
