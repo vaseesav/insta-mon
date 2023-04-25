@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 from database.db_handler import DbHandler
+from logger.logger_handler import LoggingHandler
 
 
 class DbInserter:
@@ -8,6 +9,7 @@ class DbInserter:
         self.db_name = db_name
         self.db_handler = DbHandler(db_name)
         self.meta_data_sorted = meta_data_sorted
+        self.logger = LoggingHandler().logger
 
     def insert_table(self):
         """
@@ -21,6 +23,7 @@ class DbInserter:
         Function that inserts the target data into the target table.
         """
         try:
+            self.logger.info("Inserting data into target table.")
             cursor = self.db_handler.cursor
             meta_data = self.meta_data_sorted
             unix_timestamp = datetime.now().timestamp()
@@ -31,9 +34,11 @@ class DbInserter:
             ''', meta_data)
         except sqlite3.Error as se:
             print("An error occurred while inserting data into target table.", se)
+            self.logger.error('An error occurred while inserting data into target table.', se)
             quit(-1)
         except Exception as e:
             print("An error occurred while inserting data into target table.", e)
+            self.logger.error('An error occurred while inserting data into target table.', e)
             quit(-1)
         finally:
             self.db_handler.connection.commit()
