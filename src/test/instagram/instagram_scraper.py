@@ -1,12 +1,12 @@
 from pathlib import Path
-from src.test.instagram.instagram_handler import InstagramHandler
-from src.test.logger.logger_handler import LoggingHandler
+from instagram.instagram_handler import InstagramHandler
+from logger.logger_handler import LoggingHandler
 
 
 class InstagramScraper:
-    def __init__(self, target_name, login_data):
+    def __init__(self, target_name):
         self.target_name = target_name
-        self.instagram_handler = InstagramHandler(target_name, login_data)
+        self.instagram_handler = InstagramHandler(target_name)
         self.logger = LoggingHandler(self.__class__.__name__).logger
 
     def get_metadata(self):
@@ -37,7 +37,7 @@ class InstagramScraper:
             self.logger.error("An error occurred while getting the profile picture url", e)
             quit(-1)
 
-    def download_profile_picture(self):
+    def get_profile_picture(self):
         """
         Function that downloads and saves the profile picture of a user.
         """
