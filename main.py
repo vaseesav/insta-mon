@@ -7,7 +7,7 @@ from instagram.instagram_data_sorter import DataSorter
 
 class InstaMon:
     def __init__(self):
-        self.target_name = DataInput().get_target_username()
+        self.target_name = DataInput().get_target_username_args()
         self.db_name = self.target_name + "-data.db"
         self.db_creator = DbCreator(self.db_name)
         self.instagram_scraper = InstagramScraper(self.target_name)
