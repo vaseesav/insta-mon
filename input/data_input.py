@@ -30,6 +30,10 @@ class DataInput:
             quit(-1)
 
     def get_target_username_args(self):
+        """
+        Function that gets the target_username from the args.
+        :return: target_username
+        """
         try:
             args = self.get_arguments()
             target_username = args.target
