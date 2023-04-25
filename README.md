@@ -15,7 +15,7 @@ them into a database.
 
 ## Usage
 To run the script, you will have to parse the target username as an arguement. 
-"python3 main.py -t username" or "python3 main.py --target username"
+- "python3 main.py -t username" or "python3 main.py --target username"
 
 ## Authors
 
