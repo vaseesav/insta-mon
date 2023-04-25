@@ -9,7 +9,7 @@ class DbInserter:
         self.db_name = db_name
         self.db_handler = DbHandler(db_name)
         self.meta_data_sorted = meta_data_sorted
-        self.logger = LoggingHandler().logger
+        self.logger = LoggingHandler(self.__class__.__name__).logger
 
     def insert_table(self):
         """

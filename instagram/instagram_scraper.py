@@ -7,7 +7,7 @@ class InstagramScraper:
     def __init__(self, target_name):
         self.target_name = target_name
         self.instagram_handler = InstagramHandler(target_name)
-        self.logger = LoggingHandler().logger
+        self.logger = LoggingHandler(self.__class__.__name__).logger
 
     def get_metadata(self):
         """

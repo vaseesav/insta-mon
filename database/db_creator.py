@@ -7,7 +7,7 @@ class DbCreator:
     def __init__(self, db_name):
         self.db_name = db_name
         self.db_handler = DbHandler(db_name)
-        self.logger = LoggingHandler().logger
+        self.logger = LoggingHandler(self.__class__.__name__).logger
 
     def create_tables(self):
         """

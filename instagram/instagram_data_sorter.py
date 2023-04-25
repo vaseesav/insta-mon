@@ -5,7 +5,7 @@ class DataSorter:
     def __init__(self, metadata, user_post_data):
         self.metadata = metadata
         self.user_post_data = user_post_data
-        self.logger = LoggingHandler().logger
+        self.logger = LoggingHandler(self.__class__.__name__).logger
 
     def get_metadata(self):
         """
