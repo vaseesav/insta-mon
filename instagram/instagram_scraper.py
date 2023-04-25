@@ -37,7 +37,7 @@ class InstagramScraper:
             self.logger.error("An error occurred while getting the profile picture url", e)
             quit(-1)
 
-    def get_profile_picture(self):
+    def download_profile_picture(self):
         """
         Function that downloads and saves the profile picture of a user.
         """
