@@ -5,10 +5,11 @@ from logger.logger_handler import LoggingHandler
 
 
 class DbInserter:
-    def __init__(self, db_name, meta_data_sorted):
-        self.db_name = db_name
+    def __init__(self, db_name, meta_data_sorted, image_name):
+        db_name = db_name
         self.db_handler = DbHandler(db_name)
         self.meta_data_sorted = meta_data_sorted
+        self.image_name = image_name
         self.logger = LoggingHandler(self.__class__.__name__).logger
 
     def insert_table(self):
@@ -17,6 +18,16 @@ class DbInserter:
         """
         self.insert_target_table()
         self.insert_posts_table()
+
+    def image_to_binary(self, filename):
+        try:
+            with open(filename, 'rb') as f:
+                image_data = f.read()
+                return image_data
+        except Exception as e:
+            print("An error occurred while converting the image to binary", e)
+            self.logger.error('An error occurred while converting the image to binary', e)
+            quit(-1)
 
     def insert_target_table(self):
         """
@@ -27,10 +38,12 @@ class DbInserter:
             cursor = self.db_handler.cursor
             meta_data = self.meta_data_sorted
             unix_timestamp = datetime.now().timestamp()
+            image_data = self.image_to_binary(self.image_name)
             meta_data.extend([unix_timestamp])
+            meta_data.extend([image_data])
             cursor.execute('''
-            INSERT INTO target (name, username, bio, is_private, post_amount, follower, 'followings', unix_time)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO target (name, username, bio, is_private, post_amount, follower, 'followings', unix_time, profile_picture)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', meta_data)
         except sqlite3.Error as se:
             print("An error occurred while inserting data into target table.", se)
