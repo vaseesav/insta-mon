@@ -17,6 +17,9 @@ them into a database.
 To run the script, you will have to parse the target username as an arguement. 
 - "python3 main.py -t username" or "python3 main.py --target username"
 
+You can use an Instagram account to log into:
+- "python3 main.py [...] -l username:password" or "python3 main.py [...] --login username:password"
+
 ## Authors
 
 - [@vase](https://github.com/vaseesav)
