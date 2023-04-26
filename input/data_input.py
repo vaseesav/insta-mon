@@ -21,9 +21,12 @@ class DataInput:
             self.logger.info("Parsing arguments.")
             parser = argparse.ArgumentParser()
             parser.add_argument("-t", "--target", help="Target username", required=True)
+            parser.add_argument("-l", "--login", help="Login data username:pass", required=False)
             args = parser.parse_args()
-            if args.target is not None:
+            if args is not None:
                 return args
+            else:
+                return None
         except Exception as e:
             print("An error occurred while parsing the arguments.", e)
             self.logger.error("An error occurred while parsing the arguments.")
@@ -41,4 +44,20 @@ class DataInput:
         except Exception as e:
             print("An error occurred while parsing the target_username.", e)
             self.logger.error("An error occurred while parsing the target_username.")
+            quit(-1)
+
+    def get_login_data(self):
+        """
+        Function that gets the login_data from the args.
+        :return: login_data
+        """
+        try:
+            args = self.get_arguments()
+            if args.login is not None:
+                login_data = args.login
+                login_data = str(login_data).split(':')
+                return login_data
+        except Exception as e:
+            print("An error occurred while parsing the login_data.", e)
+            self.logger.error("An error occurred while parsing the login_data.")
             quit(-1)

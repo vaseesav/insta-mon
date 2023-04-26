@@ -3,11 +3,13 @@ from logger.logger_handler import LoggingHandler
 
 
 class InstagramHandler:
-    def __init__(self, target_name):
+    def __init__(self, target_name, userdata):
         try:
             self.logger = LoggingHandler(self.__class__.__name__).logger
             self.logger.info("Loging in to Instagram.")
             self.bot = instaloader.Instaloader()
+            if userdata is not None:
+                self.bot.login(userdata[0], userdata[1])
             self.profile = instaloader.Profile.from_username(self.bot.context, target_name)
         except instaloader.LoginRequiredException as lre:
             print("Please login to your Instagram account. Or wait a few minutes and try again.", lre)
