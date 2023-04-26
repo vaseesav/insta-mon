@@ -8,9 +8,10 @@ from instagram.instagram_data_sorter import DataSorter
 class InstaMon:
     def __init__(self):
         self.target_name = DataInput().get_target_username_args()
+        self.login_data = DataInput().get_login_data()
         self.db_name = self.target_name + "-data.db"
         self.db_creator = DbCreator(self.db_name)
-        self.instagram_scraper = InstagramScraper(self.target_name)
+        self.instagram_scraper = InstagramScraper(self.target_name, self.login_data)
         self.meta_data = self.instagram_scraper.get_metadata()
         self.user_posts_data = self.instagram_scraper.get_posts()
         self.data_sorter = DataSorter(self.meta_data, self.user_posts_data)

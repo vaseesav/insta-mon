@@ -4,9 +4,9 @@ from logger.logger_handler import LoggingHandler
 
 
 class InstagramScraper:
-    def __init__(self, target_name):
+    def __init__(self, target_name, login_data):
         self.target_name = target_name
-        self.instagram_handler = InstagramHandler(target_name)
+        self.instagram_handler = InstagramHandler(target_name, login_data)
         self.logger = LoggingHandler(self.__class__.__name__).logger
 
     def get_metadata(self):
