@@ -1,5 +1,5 @@
 from instaloader import instaloader
-from logger.logger_handler import LoggingHandler
+from src.test.logger.logger_handler import LoggingHandler
 
 
 class InstagramHandler:

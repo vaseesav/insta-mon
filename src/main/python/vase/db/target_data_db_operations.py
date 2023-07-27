@@ -1,57 +1,61 @@
 import sqlite3
-from logger.logger_handler import LoggingHandler
-from database.db_handler import DbHandler
 
 
-class DbCreator:
-    def __init__(self, db_name):
-        self.db_name = db_name
-        self.db_handler = DbHandler(db_name)
-        self.logger = LoggingHandler(self.__class__.__name__).logger
+class DatabaseController:
+    """sqlite3 database class that manages the target database"""
 
-    def create_tables(self):
-        """
-        Function which runs the creation of tables.
-        """
-        self.create_target_table()
-        self.create_posts_table()
+    def __init__(self, location: str):
+        self.location = location
+        self.connection = None
+        self.cursor = None
 
-    def table_exists(self, table_name):
+    def open_connection(self):
+        """open sqlite3 connection"""
+        self.connection = sqlite3.connect(self.location)
+        self.cursor = self.connection.cursor()
+
+    def close_connection(self):
+        """close sqlite3 connection"""
+        self.connection.close()
+
+    def table_exists(self, table: str):
         """
-        Function which checks for the existence of a given table.
-        :param table_name:
-        :return: Boolean
+        Function that returns a boolean indicating whether the given table exists or not.
+        :param: table
+        :return: boolean
         """
-        cursor = self.db_handler.cursor
         query = "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
+        self.open_connection()
 
         try:
-            cursor.execute(query, (table_name,))
-            if cursor.fetchone() is not None:
-                self.logger.info("Table {} exists.".format(table_name))
+            self.cursor.execute(query, (table,))
+            if self.cursor.fetchone() is not None:
                 return True
         except sqlite3.Error as se:
             print("An error occurred while checking for tables.", se)
-            self.logger.warning('An error occurred while checking for tables.', se)
             quit(-1)
         except Exception as e:
             print("An error occurred while checking for tables.", e)
-            self.logger.warning('An error occurred while checking for tables.', e)
             quit(-1)
+        finally:
+            self.close_connection()
+
+
+class CreateTargetDatabase:
+    def __init__(self):
+        self.database_controller = DatabaseController()
 
     def create_target_table(self):
-        """
-        Function which creates the target table.
-        """
+        """Function that creates the target table with the given items if it not already exists."""
         try:
-            cursor = self.db_handler.cursor
             if self.table_exists("target"):
                 pass
             else:
-                self.logger.info("Creating target table.")
-                cursor.execute('''
+                self.open_connection()
+                self.cursor.execute('''
                 CREATE TABLE target (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT NOT NULL,
                     name TEXT NOT NULL,
                     username TEXT NOT NULL,
                     bio TEXT,
@@ -66,23 +70,22 @@ class DbCreator:
                 ''')
         except sqlite3.Error as se:
             print("An error occurred while creating the target table.", se)
-            self.logger.critical('An error occurred while creating the target table.', se)
             quit(-1)
         except Exception as e:
             print("An error occurred while creating the target table.", e)
-            self.logger.critical('An error occurred while creating the target table.', e)
             quit(-1)
         finally:
-            self.db_handler.connection.commit()
+            self.connection.commit()
+            self.close_connection()
 
     def create_posts_table(self):
+        """Function that creates the posts table with the given items if it not already exists."""
         try:
-            cursor = self.db_handler.cursor
             if self.table_exists("posts"):
                 pass
             else:
-                self.logger.info("Creating posts table.")
-                cursor.execute('''
+                self.open_connection()
+                self.cursor.execute('''
                 CREATE TABLE posts (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     caption TEXT,
@@ -100,11 +103,10 @@ class DbCreator:
                 ''')
         except sqlite3.Error as se:
             print("An error occurred while creating the posts table.", se)
-            self.logger.critical('An error occurred while creating the posts table.', se)
             quit(-1)
         except Exception as e:
             print("An error occurred while creating the posts table.", e)
-            self.logger.critical('An error occurred while creating the posts table.', e)
             quit(-1)
         finally:
-            self.db_handler.connection.commit()
+            self.connection.commit()
+            self.close_connection()

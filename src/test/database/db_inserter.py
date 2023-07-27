@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
-from database.db_handler import DbHandler
-from logger.logger_handler import LoggingHandler
+from src.test.database.db_handler import DbHandler
+from src.test.logger.logger_handler import LoggingHandler
 
 
 class DbInserter:
