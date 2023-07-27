@@ -1,4 +1,4 @@
-from logger.logger_handler import LoggingHandler
+from src.test.logger.logger_handler import LoggingHandler
 
 
 class DataSorter:
