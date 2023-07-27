@@ -1,10 +1,12 @@
 import sqlite3
+from logger.log_controller import LogController
 
 
 class DatabaseController:
     """sqlite3 database class that manages the target database"""
 
     def __init__(self, location: str):
+        self.logger = LogController(self.__class__.__name__).logger
         self.location = location
         self.connection = None
         self.cursor = None
@@ -28,21 +30,27 @@ class DatabaseController:
         self.open_connection()
 
         try:
+            self.logger.info("Checking if table exists.")
             self.cursor.execute(query, (table,))
             if self.cursor.fetchone() is not None:
                 return True
         except sqlite3.Error as se:
             print("An error occurred while checking for tables.", se)
+            self.logger.error("An error occurred while checking for tables.")
             quit(-1)
         except Exception as e:
             print("An error occurred while checking for tables.", e)
+            self.logger.error("An error occurred while checking for tables.")
             quit(-1)
         finally:
             self.close_connection()
 
 
 class CreateTargetDatabase:
+    """sqlite3 database class that creates the tables"""
+
     def __init__(self, location: str):
+        self.logger = LogController(self.__class__.__name__).logger
         self.database_controller = DatabaseController(location)
 
     def create_tables(self):
@@ -53,8 +61,10 @@ class CreateTargetDatabase:
         """Function that creates the target table with the given items if it not already exists."""
         try:
             if self.database_controller.table_exists("target"):
+                self.logger.info("The target table already exists.")
                 pass
             else:
+                self.logger.info("Creating the target table.")
                 self.database_controller.open_connection()
                 self.database_controller.cursor.execute('''
                 CREATE TABLE target (
@@ -74,9 +84,11 @@ class CreateTargetDatabase:
                 ''')
         except sqlite3.Error as se:
             print("An error occurred while creating the target table.", se)
+            self.logger.error("An error occurred while creating the target table.")
             quit(-1)
         except Exception as e:
             print("An error occurred while creating the target table.", e)
+            self.logger.error("An error occurred while creating the target table.")
             quit(-1)
         finally:
             self.database_controller.connection.commit()
@@ -86,8 +98,10 @@ class CreateTargetDatabase:
         """Function that creates the posts table with the given items if it not already exists."""
         try:
             if self.database_controller.table_exists("posts"):
+                self.logger.info("The posts table already exists.")
                 pass
             else:
+                self.logger.info("Creating the posts table.")
                 self.database_controller.open_connection()
                 self.database_controller.cursor.execute('''
                 CREATE TABLE posts (
@@ -107,9 +121,11 @@ class CreateTargetDatabase:
                 ''')
         except sqlite3.Error as se:
             print("An error occurred while creating the posts table.", se)
+            self.logger.error("An error occurred while creating the posts table.")
             quit(-1)
         except Exception as e:
             print("An error occurred while creating the posts table.", e)
+            self.logger.error("An error occurred while creating the posts table.")
             quit(-1)
         finally:
             self.database_controller.connection.commit()
