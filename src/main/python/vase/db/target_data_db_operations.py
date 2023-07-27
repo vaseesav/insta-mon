@@ -11,7 +11,7 @@ class DatabaseController:
 
     def open_connection(self):
         """open sqlite3 connection"""
-        self.connection = sqlite3.connect(self.location)
+        self.connection = sqlite3.connect(self.location + ".db")
         self.cursor = self.connection.cursor()
 
     def close_connection(self):
@@ -42,17 +42,21 @@ class DatabaseController:
 
 
 class CreateTargetDatabase:
-    def __init__(self):
-        self.database_controller = DatabaseController()
+    def __init__(self, location: str):
+        self.database_controller = DatabaseController(location)
+
+    def create_tables(self):
+        self.create_target_table()
+        self.create_posts_table()
 
     def create_target_table(self):
         """Function that creates the target table with the given items if it not already exists."""
         try:
-            if self.table_exists("target"):
+            if self.database_controller.table_exists("target"):
                 pass
             else:
-                self.open_connection()
-                self.cursor.execute('''
+                self.database_controller.open_connection()
+                self.database_controller.cursor.execute('''
                 CREATE TABLE target (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id TEXT NOT NULL,
@@ -75,17 +79,17 @@ class CreateTargetDatabase:
             print("An error occurred while creating the target table.", e)
             quit(-1)
         finally:
-            self.connection.commit()
-            self.close_connection()
+            self.database_controller.connection.commit()
+            self.database_controller.close_connection()
 
     def create_posts_table(self):
         """Function that creates the posts table with the given items if it not already exists."""
         try:
-            if self.table_exists("posts"):
+            if self.database_controller.table_exists("posts"):
                 pass
             else:
-                self.open_connection()
-                self.cursor.execute('''
+                self.database_controller.open_connection()
+                self.database_controller.cursor.execute('''
                 CREATE TABLE posts (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     caption TEXT,
@@ -108,5 +112,5 @@ class CreateTargetDatabase:
             print("An error occurred while creating the posts table.", e)
             quit(-1)
         finally:
-            self.connection.commit()
-            self.close_connection()
+            self.database_controller.connection.commit()
+            self.database_controller.close_connection()
