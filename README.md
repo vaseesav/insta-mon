@@ -1,3 +1,8 @@
+# Construction work in progress! Still restructuring!
+# As a result of the restructuring, many functions have been eliminated.
+# Not working as of now!
+
+
 # insta-mon
 Python script for tracking and recording activity of a single Instagram account. 
 Gathers user data, posts, stories, likes, comments, followers, followings, and timestamps and writes 
