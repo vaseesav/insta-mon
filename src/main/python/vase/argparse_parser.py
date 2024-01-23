@@ -46,3 +46,17 @@ class ArgParser:
             dest="verification_code",
             default=None,
         )
+
+    def parse_args(self):
+        args = self.parser.parse_args()
+
+        # Validate input
+        # if (password || username) --> password requires username || username requires password
+        # if (verify_code) --> verify_code requires username && password
+
+        if args.username is not None and args.password is None:
+            raise ValueError("Username and password must be provided together")
+        if args.verification_code is not None and (args.username is None or args.password is None):
+            raise ValueError("Verification code can only be provided if username and password are also provided")
+
+        return args
