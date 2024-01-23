@@ -1,5 +1,5 @@
 from pathlib import Path
-from instagram.instagram_handler import InstagramHandler
+from src.test2.instagram.instagram_handler import InstagramHandler
 from logger.logger_handler import LoggingHandler
 
 

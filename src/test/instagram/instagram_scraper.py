@@ -1,4 +1,4 @@
-from instagram.instagram_handler import InstagramHandler
+from src.test2.instagram.instagram_handler import InstagramHandler
 
 
 class InstagramScraper:
