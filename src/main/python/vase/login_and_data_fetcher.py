@@ -1,4 +1,4 @@
-"""Insta-mon Instagram module
+"""Insta-mon Insta module
 
 This module handles the Instagram login process,
 retrieves data from the user's profile, and transforms it into a structured format.
