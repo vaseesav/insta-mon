@@ -5,7 +5,7 @@ class LogController:
     """Handles the log messages"""
 
     def __init__(self, cls_name):
-        handler = logging.FileHandler('insta-mon.log')
+        handler = logging.FileHandler('login_and_data_fetcher.py-mon.log')
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
 

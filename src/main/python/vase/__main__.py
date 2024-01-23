@@ -8,7 +8,6 @@ This module contains the main entry point for the application.
 
 import sys
 
-
 if __name__ == '__main__':
     # Check if the correct python version is being used
     python_version = sys.version.split()[0]
@@ -19,4 +18,5 @@ if __name__ == '__main__':
         quit(-1)
 
     import instamon
+
     instamon.main()
