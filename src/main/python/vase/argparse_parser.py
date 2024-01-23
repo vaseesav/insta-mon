@@ -60,3 +60,12 @@ class ArgParser:
             raise ValueError("Verification code can only be provided if username and password are also provided")
 
         return args
+
+    def get_username(self):
+        return self.args.username
+
+    def get_password(self):
+        return self.args.password
+
+    def get_verification_code(self):
+        return self.args.verification_code
