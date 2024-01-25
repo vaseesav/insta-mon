@@ -1,71 +1,60 @@
-"""Insta-mon args module
-
-This module handles the arguments parsed from the command line
-"""
-
 import argparse
 
 
 class ArgParser:
-    """
-    Class which handles the available runtime arguments
-    """
+    """Handles command-line arguments for Insta-mon."""
 
-    def __init__(self):
-        self.parser = argparse.ArgumentParser(description="Instagram Login Parser")
+    def __init__(self) -> None:
+        self.parser = argparse.ArgumentParser(description="Insta-mon argument parser")
+        self._add_arguments()
+        self.args = self.parser.parse_args()
 
-        # Adds the username argument
+        # Store parsed arguments as instance attributes
+        self.username: str = self.args.username
+        self.password: str = self.args.password
+        self.verification_code: str = self.args.verification_code
+
+        self._validate_parsed_args()  # Validate after parsing
+
+    def _add_arguments(self) -> None:
+        """Adds optional arguments to the parser."""
         self.parser.add_argument(
             "-u",
             "--username",
             type=str,
-            help="Instagram username",
-            action="store",
-            dest="username",
             default=None,
+            help="Insta username",
         )
-
-        # Adds the password argument
         self.parser.add_argument(
             "-p",
             "--password",
             type=str,
-            help="Instagram password",
-            action="store",
-            dest="password",
             default=None,
+            help="Insta password",
         )
-
-        # Adds the verification_code argument
         self.parser.add_argument(
             "-v",
             "--verification_code",
             type=str,
-            help="Instagram verification code",
-            action="store",
-            dest="verification_code",
             default=None,
+            help="Insta verification code (optional)",
         )
 
-    def parse_args(self):
-        args = self.parser.parse_args()
-
-        # Validate input
-        # if (password || username) --> password requires username || username requires password
-        # if (verify_code) --> verify_code requires username && password
-
-        if args.username is not None and args.password is None:
+    def _validate_parsed_args(self) -> None:
+        """Validates the parsed arguments."""
+        if self.verification_code and not (self.username and self.password):
+            raise ValueError("Verification code requires both username and password")
+        if (self.username is None) ^ (self.password is None):  # Check for both or none
             raise ValueError("Username and password must be provided together")
-        if args.verification_code is not None and (args.username is None or args.password is None):
-            raise ValueError("Verification code can only be provided if username and password are also provided")
 
-        return args
+    def get_username(self) -> str:
+        """Returns the parsed username, or None if not provided."""
+        return self.username
 
-    def get_username(self):
-        return self.args.username
+    def get_password(self) -> str:
+        """Returns the parsed password, or None if not provided."""
+        return self.password
 
-    def get_password(self):
-        return self.args.password
-
-    def get_verification_code(self):
-        return self.args.verification_code
+    def get_verification_code(self) -> str:
+        """Returns the parsed verification code, if provided."""
+        return self.verification_code
