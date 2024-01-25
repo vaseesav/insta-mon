@@ -6,13 +6,17 @@ from typing import Optional
 from instagrapi import Client
 
 
+class InstaLoginException(Exception):
+    """Custom exception for Insta login-related errors."""
+    # TODO: implement
+
+
 class InstaLogin:
     """Handles the Insta login process."""
 
     def __init__(self) -> None:
-        self.client: Client = None
+        self.client: Optional[Client] = None
 
-        # logging configuration
         logging.basicConfig(
             filename='insta_login.log',
             level=logging.INFO,
@@ -30,6 +34,9 @@ class InstaLogin:
 
         Returns:
             True if login is successful, False otherwise.
+
+        Raises:
+            InstaLoginException: If login fails due to specific errors.
         """
 
         try:
@@ -46,8 +53,7 @@ class InstaLogin:
 
         except self.client.handle_exception as e:
             logging.error("Login failed: %s", str(e))
-            print("Login failed. Please check your credentials and try again.", e)
-            return False
+            raise InstaLoginException(f"Login failed due to Insta error: {e}") from e
         except Exception as e:
             logging.error("Login failed: %s", str(e))
-            print("Login failed. Please check your credentials and try again.", e)
+            raise InstaLoginException("An unexpected error occurred during login.") from e
