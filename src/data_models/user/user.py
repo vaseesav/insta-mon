@@ -7,7 +7,7 @@ class User:
     """Class representing an Instagram user."""
 
     def __init__(self, uid: str, username: str, name: str, bio: str, post_amount: int,
-                 follower_amount: int, follows_amount: int):
+                 follower_amount: int, follows_amount: int, profile_image_path: str):
         """
         Initialize a new User instance.
 
@@ -19,6 +19,7 @@ class User:
             post_amount (int): The number of posts the user has made.
             follower_amount (int): The number of followers the user has.
             follows_amount (int): The number of users this user follows.
+            profile_image_path (str): The user's profile image.
         """
         self.uid = uid
         self.username = username
@@ -27,6 +28,7 @@ class User:
         self.post_amount = post_amount
         self.follower_amount = follower_amount
         self.follows_amount = follows_amount
+        self.profile_image_path = profile_image_path
 
     def __repr__(self) -> str:
         """
@@ -38,7 +40,7 @@ class User:
         return (
             f"User(uid={self.uid}, username={self.username}, name={self.name}, bio={self.bio},"
             f" post_amount={self.post_amount}, follower_amount={self.follower_amount},"
-            f" follows_amount={self.follows_amount})")
+            f" follows_amount={self.follows_amount}, profile_image_path={self.profile_image_path})")
 
     def set_uid(self, new_uid: str) -> None:
         """
@@ -165,3 +167,21 @@ class User:
             int: The current follows amount of the user.
         """
         return self.follows_amount
+
+    def set_profile_image_path(self, new_profile_image_path: str) -> None:
+        """
+        Set the user's profile_image_path.
+
+        Args:
+            new_profile_image_path (int): The new image path.
+        """
+        self.profile_image_path = new_profile_image_path
+
+    def get_profile_image_path(self) -> str:
+        """
+        Get the user's follows amount.
+
+        Returns:
+            int: The current follows amount of the user.
+        """
+        return self.profile_image_path
