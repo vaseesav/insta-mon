@@ -43,7 +43,7 @@ parsed_config = load_config('config.yaml')
 
 # Providing getter access to the configuration file
 config = {
-    'URLS':
+    'SCRAP_INTERVAL':
         parsed_config['instamon']['scrap_interval']}
 
 """Lambda getter expression to access the configuration file values."""
