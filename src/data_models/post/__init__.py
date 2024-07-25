@@ -3,8 +3,8 @@ post package initialization file.
 This file initializes the post package and defines module exports.
 """
 
-from .image import Image
-from .reel import Reel
-from .story import Story
+from .imagepost import ImagePost
+from .reelpost import ReelPost
+from .storypost import StoryPost
 
-__all__ = ["Image", "Reel", "Story"]
+__all__ = ["ImagePost", "ReelPost", "StoryPost"]

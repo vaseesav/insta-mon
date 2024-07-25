@@ -1,4 +1,5 @@
 ---
 instamon:
+  database: "target.db"
   scrap_interval: 30
 ...

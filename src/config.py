@@ -3,7 +3,7 @@ import logging
 from typing import Optional
 
 from path import Path
-from strictyaml import load, Map, Int
+from strictyaml import load, Map, Int, Str
 
 from src import log
 
@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 # YAML validation schema for the config.yaml
 schema = Map({
     "instamon": Map({
+        "database": Str(),
         "scrap_interval": Int()
     })
 })
@@ -44,7 +45,10 @@ parsed_config = load_config('config.yaml')
 # Providing getter access to the configuration file
 config = {
     'SCRAP_INTERVAL':
-        parsed_config['instamon']['scrap_interval']}
+        parsed_config['instamon']['scrap_interval'],
+    'DB_SQ3_FILE':
+        parsed_config['instamon']['database']
+}
 
 """Lambda getter expression to access the configuration file values."""
 get = lambda keyname: config[keyname]

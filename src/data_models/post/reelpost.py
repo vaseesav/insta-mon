@@ -1,56 +1,80 @@
 """
-Defines the Image data class with attributes and methods for managing Instagram image data.
+Defines the Reel data class with attributes and methods for managing Instagram reel data.
 """
 
+from src.data_models.post.post import Post
 
-class Image:
-    """Class representing an Instagram image post."""
-    def __init__(self, picture_path: str, description: str, like_amount: str, comment_amount: str):
+
+class ReelPost(Post):
+    """Class representing an Instagram reel post."""
+
+    def __init__(self, post_id: str, video_path: str, description: str,
+                 like_amount: int, comment_amount: int):
         # TODO: add comments, likes
         """
-        Initialize a new Image post instance.
+        Initialize a new Reel post instance.
 
         Args:
-            picture_path (str): The Instagram picture post path.
-            description (str): The Instagram picture post description.
-            like_amount (str): The Instagram picture post amount of likes .
-            comment_amount (str): The Instagram picture post amount of comments .
+            post_id (str): The instagram reel post id.
+            video_path (str): The Instagram reel post path.
+            description (str): The Instagram reel post description.
+            like_amount (str): The Instagram reel post amount of likes .
+            comment_amount (str): The Instagram reel post amount of comments .
 
         """
-        self.picture_path = picture_path
+        super().__init__(
+            post_id=post_id,
+            post_type="Reel",
+            media_path=video_path,
+            description=description,
+            like_amount=like_amount,
+            comment_amount=comment_amount
+        )
+        self.post_id = post_id
+        self.reel_path = video_path
         self.description = description
         self.like_amount = like_amount
         self.comment_amount = comment_amount
 
     def __repr__(self) -> str:
         """
-        Return a string representation of the Image instance.
+        Return a string representation of the Reel instance.
 
         Returns:
-            str: A string representation of the image.
+            str: A string representation of the reel.
         """
         return (
-            f"Image(picture_path={self.picture_path}, description={self.description}, "
+            f"Reel(post_id={self.post_id}, reel_path={self.reel_path}, "
+            f"description={self.description}, "
             f"like_amount={self.like_amount}, comment_amount={self.comment_amount}"
         )
 
-    def set_picture_path(self, new_path: str) -> None:
+    def set_post_id(self, new_id: str) -> None:
         """
         Set the picture post path.
 
         Args:
+            new_id (str): The new id.
+        """
+        self.post_id = new_id
+
+    def set_reel_path(self, new_path: str) -> None:
+        """
+        Set the reel post path.
+
+        Args:
             new_path (str): The new path.
         """
-        self.picture_path = new_path
+        self.reel_path = new_path
 
-    def get_picture_path(self) -> str:
+    def get_reel_path(self) -> str:
         """
-        Get the picture post path.
+        Get the reel post path.
 
         Returns:
-            str: The current path of the picture.
+            str: The current path of the reel.
         """
-        return self.picture_path
+        return self.reel_path
 
     def set_description(self, new_description: str) -> None:
         """
