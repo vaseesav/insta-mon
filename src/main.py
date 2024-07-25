@@ -36,9 +36,9 @@ class ArgumentParser:
     """Class which handles the argument parsing."""
     def __init__(self):
         self.parser = argparse.ArgumentParser(description='Instamon settings.')
-        self.parser.add_argument('-u', '--username', type=str, required=True,
+        self.parser.add_argument('-u', '--username', type=str, required=False,
                                  help='The username for the account to log into')
-        self.parser.add_argument('-p', '--password', type=str, required=True,
+        self.parser.add_argument('-p', '--password', type=str, required=False,
                                  help='The password for the account to log into')
 
     def parse_arguments(self):
