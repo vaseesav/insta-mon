@@ -1,7 +1,7 @@
 """Main module of insta-mon. Containing the instagram backend logic."""
+import argparse
 import logging
 import time
-from threading import Thread
 
 from src import config, log
 
@@ -14,7 +14,8 @@ class InstaMon:
     """Main class for instagram backend logic."""
 
     def __init__(self):
-        pass
+        self.arg_parser = ArgumentParser()
+        self.args = self.arg_parser.parse_arguments()
 
     def insta_scrap_query_handler(self) -> None:
         """
@@ -29,6 +30,20 @@ class InstaMon:
             first_run = False
 
             logger.debug('Run completed!')
+
+
+class ArgumentParser:
+    """Class which handles the argument parsing."""
+    def __init__(self):
+        self.parser = argparse.ArgumentParser(description='Instamon settings.')
+        self.parser.add_argument('-u', '--username', type=str, required=True,
+                                 help='The username for the account to log into')
+        self.parser.add_argument('-p', '--password', type=str, required=True,
+                                 help='The password for the account to log into')
+
+    def parse_arguments(self):
+        """Function which parses arguments passed from the command line."""
+        return self.parser.parse_args()
 
 
 if __name__ == "__main__":
