@@ -1,0 +1,29 @@
+---
+version: 1
+disable_existing_loggers: false
+formatters:
+  standard:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+handlers:
+  file_handler:
+    class: logging.FileHandler
+    filename: instamon.log
+    formatter: standard
+    level: DEBUG
+  console_handler:
+    class: logging.StreamHandler
+    formatter: standard
+    level: INFO
+loggers:
+  werkzeug:
+    handlers: [file_handler, console_handler]
+    level: WARNING
+    propagate: false
+  urllib3:
+    handlers: [file_handler, console_handler]
+    level: WARNING
+    propagate: false
+root:
+  handlers: [file_handler, console_handler]
+  level: DEBUG
+...
