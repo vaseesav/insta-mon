@@ -40,7 +40,7 @@ def load_config(file_path: str) -> Optional[dict]:
 
 
 # Load the configuration file
-parsed_config = load_config('config.yaml')
+parsed_config = load_config('src/config.yaml')
 
 # Providing getter access to the configuration file
 config = {
