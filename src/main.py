@@ -3,7 +3,11 @@ import argparse
 import logging
 import time
 
+import instagrapi.exceptions
+
 from src import config, log
+from instagrapi import Client
+
 
 # Setup logging
 log.setup_logging()
@@ -16,6 +20,7 @@ class InstaMon:
     def __init__(self):
         self.arg_parser = ArgumentParser()
         self.args = self.arg_parser.parse_arguments()
+        self.client = Client()
 
     def insta_scrap_query_handler(self) -> None:
         """
@@ -24,6 +29,22 @@ class InstaMon:
         :return: None
         """
         first_run = True
+        ACCOUNT_USERNAME = self.args.username
+        ACCOUNT_PASSWORD = self.args.password
+
+        try:
+            if ACCOUNT_USERNAME and ACCOUNT_PASSWORD:
+                self.client.login(ACCOUNT_USERNAME, ACCOUNT_PASSWORD)
+        except instagrapi.exceptions.BadPassword as password_error:
+            logger.error("The password is wrong: %s", password_error)
+        except instagrapi.exceptions.ReloginAttemptExceeded as exceeded_error:
+            logger.error("Too many failed login attempts %s", exceeded_error)
+        except instagrapi.exceptions.ChallengeRequired as challenge_error:
+            logger.error("Challenge is required: %s", challenge_error)
+        except Exception as error:
+            logger.error("An  unexpected error occurred while trying to log "
+                         "into instagram: %s", error)
+
         while True:
             if not first_run:
                 time.sleep(config.get("SCRAP_INTERVAL"))
