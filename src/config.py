@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 schema = Map({
     "instamon": Map({
         "database": Str(),
-        "scrap_interval": Int()
+        "scrap_interval": Int(),
+        "timeout_sec": Int()
     })
 })
 
@@ -47,7 +48,9 @@ config = {
     'SCRAP_INTERVAL':
         parsed_config['instamon']['scrap_interval'],
     'DB_SQ3_FILE':
-        parsed_config['instamon']['database']
+        parsed_config['instamon']['database'],
+    'TIMEOUT_SEC':
+        parsed_config['instamon']['timeout_sec'],
 }
 
 """Lambda getter expression to access the configuration file values."""
