@@ -1,0 +1,5 @@
+instagrapi~=2.1.2
+Pillow>=8.1.1
+path>=16.14.0
+strictyaml>=1.7.3
+PyYAML>=6.0.2rc1
