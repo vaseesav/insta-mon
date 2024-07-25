@@ -40,6 +40,10 @@ class ArgumentParser:
                                  help='The username for the account to log into')
         self.parser.add_argument('-p', '--password', type=str, required=False,
                                  help='The password for the account to log into')
+        self.parser.add_argument('-t', '--tfa', type=str, required=False,
+                                 help='The 2FA code for the account to log into')
+        self.parser.add_argument('-s', '--sessionid', type=str, required=False,
+                                 help='The session id for the account to log into')
 
     def parse_arguments(self):
         """Function which parses arguments passed from the command line."""
