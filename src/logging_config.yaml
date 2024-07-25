@@ -15,11 +15,15 @@ handlers:
     formatter: standard
     level: INFO
 loggers:
-  werkzeug:
+  instagrapi:
     handlers: [file_handler, console_handler]
     level: WARNING
     propagate: false
-  urllib3:
+  private_request:
+    handlers: [file_handler, console_handler]
+    level: WARNING
+    propagate: false
+  public_request:
     handlers: [file_handler, console_handler]
     level: WARNING
     propagate: false
