@@ -33,12 +33,13 @@ class InstaMon:
 
 if __name__ == "__main__":
     app = InstaMon()
-    insta_scrap_thread = Thread(target=app.insta_scrap_query_handler)
-    insta_scrap_thread.daemon = False
-    insta_scrap_thread.start()
+    # insta_scrap_thread = Thread(target=app.insta_scrap_query_handler)
+    # insta_scrap_thread.daemon = False
+    # insta_scrap_thread.start()
 
     try:
         # wait for the insta_scrap_thread to complete
-        insta_scrap_thread.join()
+        # insta_scrap_thread.join()
+        app.insta_scrap_query_handler()
     except KeyboardInterrupt:
         logger.info("Shutting down.")
