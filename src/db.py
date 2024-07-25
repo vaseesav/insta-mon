@@ -103,10 +103,10 @@ def insert_user(user: User) -> None:
          FollowsAmount, ProfileImagePath)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (user.user_id,
+        (user.uid,
          user.username,
          user.name,
-         user.biography,
+         user.bio,
          user.post_amount,
          user.follower_amount,
          user.follows_amount,
@@ -124,23 +124,122 @@ def insert_post(post):
     if isinstance(post, ImagePost):
         db_connection().execute(
             """
-            INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description, LikeAmount, CommentAmount)
+            INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description,
+             LikeAmount, CommentAmount)
             VALUES (?, ?, ?, ?, ?, ?)
             """, post.to_tuple()
         )
     elif isinstance(post, ReelPost):
         db_connection().execute(
             """
-           INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description, LikeAmount, CommentAmount)
+           INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description,
+            LikeAmount, CommentAmount)
            VALUES (?, ?, ?, ?, ?, ?)
             """, post.to_tuple()
         )
     elif isinstance(post, StoryPost):
         db_connection().execute(
             """
-            INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description, LikeAmount, CommentAmount)
+            INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description,
+             LikeAmount, CommentAmount)
             VALUES (?, ?, ?, ?, ?, ?)
             """, post.to_tuple()
+        )
+    else:
+        raise ValueError("Unsupported post type")
+
+    db_connection().commit()
+
+
+def update_config(key: str, value: str) -> None:
+    """
+    Function that updates the config table.
+
+    :param key: Config key to update.
+    :param value: New config value.
+    """
+    db_connection().execute(
+        """
+        UPDATE Config
+        SET Value = ?
+        WHERE Key = ?
+        """,
+        (value, key)
+    )
+    db_connection().commit()
+
+
+def update_user(user: User) -> None:
+    """
+    Function that updates the user table.
+
+    :param user: User object to update in the database.
+    """
+    db_connection().execute(
+        """
+        UPDATE User
+        SET Username = ?,
+            Name = ?,
+            Biography = ?,
+            PostAmount = ?,
+            FollowerAmount = ?,
+            FollowsAmount = ?,
+            ProfileImagePath = ?
+        WHERE UserId = ?
+        """,
+        (user.username,
+         user.name,
+         user.bio,
+         user.post_amount,
+         user.follower_amount,
+         user.follows_amount,
+         user.profile_image_path,
+         user.uid)
+    )
+    db_connection().commit()
+
+
+def update_post(post) -> None:
+    """
+    Update a post in the Post table.
+
+    :param post: An instance of ImagePost, ReelPost, or StoryPost.
+    """
+    if isinstance(post, ImagePost):
+        db_connection().execute(
+            """
+            UPDATE Post
+            SET PostType = ?,
+                MediaPath = ?,
+                Description = ?,
+                LikeAmount = ?,
+                CommentAmount = ?
+            WHERE PostId = ?
+            """, post.to_tuple() + (post.post_id,)
+        )
+    elif isinstance(post, ReelPost):
+        db_connection().execute(
+            """
+            UPDATE Post
+            SET PostType = ?,
+                MediaPath = ?,
+                Description = ?,
+                LikeAmount = ?,
+                CommentAmount = ?
+            WHERE PostId = ?
+            """, post.to_tuple() + (post.post_id,)
+        )
+    elif isinstance(post, StoryPost):
+        db_connection().execute(
+            """
+            UPDATE Post
+            SET PostType = ?,
+                MediaPath = ?,
+                Description = ?,
+                LikeAmount = ?,
+                CommentAmount = ?
+            WHERE PostId = ?
+            """, post.to_tuple() + (post.post_id,)
         )
     else:
         raise ValueError("Unsupported post type")
