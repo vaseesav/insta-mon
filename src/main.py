@@ -1,13 +1,19 @@
 """Main module of insta-mon. Containing the instagram backend logic."""
 import argparse
 import logging
+import os
 import time
+from io import BytesIO
+from urllib.parse import urlparse
 
 import instagrapi.exceptions
-
-from src import config, log
+import requests
+from PIL import Image
 from instagrapi import Client
 
+from src import config, log
+from src.data_models import User
+from src.db import insert_user
 
 # Setup logging
 log.setup_logging()
@@ -23,7 +29,85 @@ class InstaMon:
         self.client = Client()
 
     def get_user_info(self, target_username: str) -> object:
+        """
+        Function to get user info from instagram.
+
+        :param target_username: instagram username
+        :return: instagram user info
+        """
         return self.client.user_info_by_username(username=target_username, use_cache=False)
+
+    def download_image(self, url: str, target_type: str) -> str:
+        """
+        Downloads an image from the provided URL and saves it to a specified directory.
+
+        :param url: The URL of the image to be downloaded.
+        :param target_type: The target directory type, either 'profilePicture' or 'post'.
+
+        :return: The path where the image is saved.
+
+        :raises ValueError: If the target_type is not 'profilePicture' or 'post'.
+        :raises requests.exceptions.RequestException: If there is an issue with the HTTP request.
+        :raises OSError: If there is an issue creating directories or saving the file.
+        """
+
+        if target_type not in ['profilePicture', 'post']:
+            raise ValueError("target_type must be either 'profilePicture' or 'post'")
+
+        # Parse the URL to extract the file name
+        parsed_url = urlparse(url)
+        file_name = os.path.basename(parsed_url.path)
+
+        # Set the target directory
+        target_dir = os.path.join('target', target_type)
+        os.makedirs(target_dir, exist_ok=True)
+
+        # Full path to save the image
+        file_path = os.path.join(target_dir, file_name)
+
+        try:
+            # Send HTTP request to download the image
+            response = requests.get(url, timeout=config.get("TIMEOUT_SEC"))
+            response.raise_for_status()
+
+            # Open the image from the response content
+            image = Image.open(BytesIO(response.content))
+
+            # Save the image using Pillow
+            image.save(file_path)
+        except requests.exceptions.RequestException as request_error:
+            logger.error("Failed to download image from url: %s with error: %s", url, request_error)
+        except OSError as e:
+            logger.error("Failed to save image from url: %s with error: %s", url, e)
+        return file_path
+
+    def create_user_obj(self, target_user: instagrapi.types.User) -> User:
+        """
+        Function to create an instagram user object.
+
+        :param target_user: user scraped from instagram
+
+        :return: user object for db
+        """
+        uid = target_user.pk
+        username = target_user.username
+        name = target_user.full_name
+        bio = target_user.biography
+        post_amount = target_user.media_count
+        follower_amount = target_user.follower_count
+        follows_amount = target_user.following_count
+        profile_image_path = self.download_image(str(target_user.profile_pic_url_hd), 'profilePicture')
+
+        parsed_target_user = User(uid=uid,
+                                  username=username,
+                                  name=name,
+                                  bio=bio,
+                                  post_amount=post_amount,
+                                  follower_amount=follower_amount,
+                                  follows_amount=follows_amount,
+                                  profile_image_path=profile_image_path)
+
+        return parsed_target_user
 
     def insta_scrap_query_handler(self) -> None:
         """
@@ -56,13 +140,16 @@ class InstaMon:
             if not first_run:
                 time.sleep(config.get("SCRAP_INTERVAL"))
             first_run = False
-            target_user_info = self.get_user_info(target_username=TARGET_USERNAME)
-            print(target_user_info)
-            logger.debug('Run completed!')
+            target_user = self.get_user_info(target_username=TARGET_USERNAME)
+            new_target_user = self.create_user_obj(target_user=target_user)
+            insert_user(new_target_user)
+
+            logger.info('Run completed!')
 
 
 class ArgumentParser:
     """Class which handles the argument parsing."""
+
     def __init__(self):
         self.parser = argparse.ArgumentParser(description='Instamon settings.')
         self.parser.add_argument('-u', '--username', type=str, required=False,

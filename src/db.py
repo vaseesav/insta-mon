@@ -3,6 +3,7 @@
 import logging
 import sqlite3
 import threading
+import time
 
 from src.config import config
 from src.data_models import User
@@ -46,14 +47,16 @@ def db_connection() -> sqlite3:
 
     _db_connection.execute('''
         CREATE TABLE IF NOT EXISTS "User" (
-            "UserId"  TEXT NOT NULL UNIQUE PRIMARY KEY,
+            "Id" INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
+            "UserId"  TEXT,
             "Username"  TEXT,
             "Name"  TEXT,
             "Biography" TEXT,
             "PostAmount" INTEGER,
             "FollowerAmount" INTEGER,
             "FollowsAmount" INTEGER,
-            "ProfileImagePath" TEXT
+            "ProfileImagePath" TEXT,
+            "TimeStamp" INTEGER
         );
     ''')
 
@@ -100,8 +103,8 @@ def insert_user(user: User) -> None:
     db_connection().execute(
         """
         INSERT OR IGNORE INTO User (UserId, Username, Name, Biography, PostAmount, FollowerAmount,
-         FollowsAmount, ProfileImagePath)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         FollowsAmount, ProfileImagePath, TimeStamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (user.uid,
          user.username,
@@ -110,7 +113,8 @@ def insert_user(user: User) -> None:
          user.post_amount,
          user.follower_amount,
          user.follows_amount,
-         user.profile_image_path)
+         user.profile_image_path,
+         int(time.time()))
     )
     db_connection().commit()
 
