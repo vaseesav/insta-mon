@@ -115,7 +115,7 @@ def insert_user(user: User) -> None:
     db_connection().commit()
 
 
-def insert_post(post):
+def insert_post(post) -> None:
     """
     Insert a post into the Post table.
 
