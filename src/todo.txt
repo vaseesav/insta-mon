@@ -1,1 +1,4 @@
 - rework post -> every kind of post is a child of post
+- post handling only works for posts with one file
+- post handling only works if no post is pinned (loop only the latest pinned post)
+- add stories
