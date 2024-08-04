@@ -20,10 +20,10 @@ Gathers user data, posts and timestamps and writes them into a database.
 
 ## Usage
 To run the script, you will have to parse the target username as an argument. 
-- "python3 main.py -u <email> -p <password> -t <target_username>"
+- "python3 main.py -u <-email-> -p <-password-> -t <-target_username->"
 
 You can also log into 2FA accounts:
-- "python3 main.py [...] -f <code>"
+- "python3 main.py [...] -f <-code->"
 
 ## Authors
 
