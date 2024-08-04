@@ -148,6 +148,14 @@ class InstaMon:
         """
         return self.client.user_info_by_username(username=target_username, use_cache=False)
 
+    def handle_user_data(self, target_username: str):
+        target_user = self.get_user_info(target_username=target_username)
+        new_target_user = create_user_obj(target_user=target_user)
+        last_user = get_last_user_info()
+
+        if last_user is None or users_are_different(new_target_user, last_user):
+            insert_user(new_target_user)
+
     def insta_scrap_query_handler(self) -> None:
         """
         Function which periodically scrapes instagram data of a certain user from instagram API.
@@ -179,13 +187,7 @@ class InstaMon:
             if not first_run:
                 time.sleep(config.get("SCRAP_INTERVAL"))
             first_run = False
-            target_user = self.get_user_info(target_username=TARGET_USERNAME)
-            new_target_user = create_user_obj(target_user=target_user)
-            last_user = get_last_user_info()
-
-            if last_user is None or users_are_different(new_target_user, last_user):
-                insert_user(new_target_user)
-
+            self.handle_user_data(target_username=TARGET_USERNAME)
             logger.info('Run completed!')
 
 
