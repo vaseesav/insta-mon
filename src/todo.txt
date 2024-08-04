@@ -1,0 +1,1 @@
+- rework post -> every kind of post is a child of post
