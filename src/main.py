@@ -3,6 +3,7 @@ import argparse
 import logging
 import os
 import time
+from enum import Enum
 from io import BytesIO
 from urllib.parse import urlparse
 
@@ -18,6 +19,75 @@ from src.db import insert_user
 # Setup logging
 log.setup_logging()
 logger = logging.getLogger(__name__)
+
+
+class TargetType(Enum):
+    """
+    Enum representing the types of targets for image downloads.
+    This enum defines the allowed categories for organizing downloaded images.
+
+    Attributes:
+        PROFILE_PICTURE (str): Represents the directory for profile pictures.
+        POST (str): Represents the directory for post-related images.
+    """
+    PROFILE_PICTURE = 'profilePicture'
+    POST = 'post'
+
+
+def download_image(url: str, target_type: TargetType) -> str:
+    """
+    Downloads an image from the provided URL and saves it to a specified directory.
+    If the image already exists at the target location, it will not be downloaded again.
+
+    :param url: The URL of the image to be downloaded.
+    :param target_type: The target directory type,
+    either TargetType.PROFILE_PICTURE or TargetType.POST.
+
+    :return: The path where the image is saved or already exists.
+
+    :raises ValueError: If the target_type is not a valid TargetType.
+    :raises requests.exceptions.RequestException: If there is an issue with the HTTP request.
+    :raises OSError: If there is an issue creating directories or saving the file.
+    """
+
+    if target_type not in TargetType:
+        raise ValueError("Invalid target_type: %s" % target_type)
+
+    # Parse the URL to extract the file name
+    parsed_url = urlparse(url)
+    file_name = os.path.basename(parsed_url.path)
+
+    # Set the target directory
+    target_dir = os.path.join('target', target_type.value)
+    os.makedirs(target_dir, exist_ok=True)
+
+    # Full path to save the image
+    file_path = os.path.join(target_dir, file_name)
+
+    # Check if the file already exists
+    if os.path.exists(file_path):
+        logger.debug("Image already exists at %s. Skipping download.", file_path)
+        return file_path
+
+    try:
+        # Send HTTP request to download the image
+        response = requests.get(url, timeout=config.get("TIMEOUT_SEC"))
+        response.raise_for_status()
+
+        # Open the image from the response content
+        image = Image.open(BytesIO(response.content))
+
+        # Save the image using Pillow
+        image.save(file_path)
+        logger.debug("Image successfully downloaded and saved to %s", file_path)
+    except requests.exceptions.RequestException as request_error:
+        logger.error("Failed to download image from url: %s with error: %s", url, request_error)
+        raise
+    except OSError as os_error:
+        logger.error("Failed to save image from url: %s with error: %s", url, os_error)
+        raise
+
+    return file_path
 
 
 class InstaMon:
@@ -37,50 +107,6 @@ class InstaMon:
         """
         return self.client.user_info_by_username(username=target_username, use_cache=False)
 
-    def download_image(self, url: str, target_type: str) -> str:
-        """
-        Downloads an image from the provided URL and saves it to a specified directory.
-
-        :param url: The URL of the image to be downloaded.
-        :param target_type: The target directory type, either 'profilePicture' or 'post'.
-
-        :return: The path where the image is saved.
-
-        :raises ValueError: If the target_type is not 'profilePicture' or 'post'.
-        :raises requests.exceptions.RequestException: If there is an issue with the HTTP request.
-        :raises OSError: If there is an issue creating directories or saving the file.
-        """
-
-        if target_type not in ['profilePicture', 'post']:
-            raise ValueError("target_type must be either 'profilePicture' or 'post'")
-
-        # Parse the URL to extract the file name
-        parsed_url = urlparse(url)
-        file_name = os.path.basename(parsed_url.path)
-
-        # Set the target directory
-        target_dir = os.path.join('target', target_type)
-        os.makedirs(target_dir, exist_ok=True)
-
-        # Full path to save the image
-        file_path = os.path.join(target_dir, file_name)
-
-        try:
-            # Send HTTP request to download the image
-            response = requests.get(url, timeout=config.get("TIMEOUT_SEC"))
-            response.raise_for_status()
-
-            # Open the image from the response content
-            image = Image.open(BytesIO(response.content))
-
-            # Save the image using Pillow
-            image.save(file_path)
-        except requests.exceptions.RequestException as request_error:
-            logger.error("Failed to download image from url: %s with error: %s", url, request_error)
-        except OSError as e:
-            logger.error("Failed to save image from url: %s with error: %s", url, e)
-        return file_path
-
     def create_user_obj(self, target_user: instagrapi.types.User) -> User:
         """
         Function to create an instagram user object.
@@ -96,7 +122,8 @@ class InstaMon:
         post_amount = target_user.media_count
         follower_amount = target_user.follower_count
         follows_amount = target_user.following_count
-        profile_image_path = self.download_image(str(target_user.profile_pic_url_hd), 'profilePicture')
+        profile_image_path = download_image(str(target_user.profile_pic_url_hd),
+                                                 TargetType.PROFILE_PICTURE)
 
         parsed_target_user = User(uid=uid,
                                   username=username,
