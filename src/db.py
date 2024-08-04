@@ -63,7 +63,8 @@ def db_connection() -> sqlite3:
 
     _db_connection.execute('''
         CREATE TABLE IF NOT EXISTS "Post" (
-            "PostId"  TEXT NOT NULL UNIQUE PRIMARY KEY,
+            "Id" INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
+            "PostId"  TEXT,
             "PostType" TEXT,
             "MediaPath" TEXT,
             "Description" Text,
