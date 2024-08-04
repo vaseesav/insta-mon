@@ -70,7 +70,8 @@ def db_connection() -> sqlite3:
             "MediaPath" TEXT,
             "Description" Text,
             "LikeAmount"  INTEGER,
-            "CommentAmount" INTEGER
+            "CommentAmount" INTEGER,
+            "TimeStamp" INTEGER
         );
     ''')
 
@@ -128,29 +129,31 @@ def insert_post(post) -> None:
 
     :param post: An instance of ImagePost, ReelPost, or StoryPost.
     """
+    current_time = int(time.time())
+
     if isinstance(post, ImagePost):
         db_connection().execute(
             """
             INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description,
-             LikeAmount, CommentAmount)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """, post.to_tuple()
+             LikeAmount, CommentAmount, TimeStamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (*post.to_tuple(), current_time)
         )
     elif isinstance(post, ReelPost):
         db_connection().execute(
             """
            INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description,
-            LikeAmount, CommentAmount)
-           VALUES (?, ?, ?, ?, ?, ?)
-            """, post.to_tuple()
+            LikeAmount, CommentAmount, TimeStamp)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (*post.to_tuple(), current_time)
         )
     elif isinstance(post, StoryPost):
         db_connection().execute(
             """
             INSERT OR IGNORE INTO Post (PostId, PostType, MediaPath, Description,
-             LikeAmount, CommentAmount)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """, post.to_tuple()
+             LikeAmount, CommentAmount, TimeStamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (*post.to_tuple(), current_time)
         )
     else:
         raise ValueError("Unsupported post type")
