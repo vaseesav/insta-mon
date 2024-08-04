@@ -90,6 +90,36 @@ def download_image(url: str, target_type: TargetType) -> str:
     return file_path
 
 
+def create_user_obj(target_user: instagrapi.types.User) -> User:
+    """
+    Function to create an instagram user object.
+
+    :param target_user: user scraped from instagram
+
+    :return: user object for db
+    """
+    uid = target_user.pk
+    username = target_user.username
+    name = target_user.full_name
+    bio = target_user.biography
+    post_amount = target_user.media_count
+    follower_amount = target_user.follower_count
+    follows_amount = target_user.following_count
+    profile_image_path = download_image(str(target_user.profile_pic_url_hd),
+                                             TargetType.PROFILE_PICTURE)
+
+    parsed_target_user = User(uid=uid,
+                              username=username,
+                              name=name,
+                              bio=bio,
+                              post_amount=post_amount,
+                              follower_amount=follower_amount,
+                              follows_amount=follows_amount,
+                              profile_image_path=profile_image_path)
+
+    return parsed_target_user
+
+
 class InstaMon:
     """Main class for instagram backend logic."""
 
@@ -106,35 +136,6 @@ class InstaMon:
         :return: instagram user info
         """
         return self.client.user_info_by_username(username=target_username, use_cache=False)
-
-    def create_user_obj(self, target_user: instagrapi.types.User) -> User:
-        """
-        Function to create an instagram user object.
-
-        :param target_user: user scraped from instagram
-
-        :return: user object for db
-        """
-        uid = target_user.pk
-        username = target_user.username
-        name = target_user.full_name
-        bio = target_user.biography
-        post_amount = target_user.media_count
-        follower_amount = target_user.follower_count
-        follows_amount = target_user.following_count
-        profile_image_path = download_image(str(target_user.profile_pic_url_hd),
-                                                 TargetType.PROFILE_PICTURE)
-
-        parsed_target_user = User(uid=uid,
-                                  username=username,
-                                  name=name,
-                                  bio=bio,
-                                  post_amount=post_amount,
-                                  follower_amount=follower_amount,
-                                  follows_amount=follows_amount,
-                                  profile_image_path=profile_image_path)
-
-        return parsed_target_user
 
     def insta_scrap_query_handler(self) -> None:
         """
@@ -168,7 +169,7 @@ class InstaMon:
                 time.sleep(config.get("SCRAP_INTERVAL"))
             first_run = False
             target_user = self.get_user_info(target_username=TARGET_USERNAME)
-            new_target_user = self.create_user_obj(target_user=target_user)
+            new_target_user = create_user_obj(target_user=target_user)
             insert_user(new_target_user)
 
             logger.info('Run completed!')
