@@ -14,7 +14,7 @@ from instagrapi import Client
 
 from src import config, log
 from src.data_models import User
-from src.db import insert_user
+from src.db import insert_user, get_last_user_info
 
 # Setup logging
 log.setup_logging()
@@ -106,7 +106,7 @@ def create_user_obj(target_user: instagrapi.types.User) -> User:
     follower_amount = target_user.follower_count
     follows_amount = target_user.following_count
     profile_image_path = download_image(str(target_user.profile_pic_url_hd),
-                                             TargetType.PROFILE_PICTURE)
+                                        TargetType.PROFILE_PICTURE)
 
     parsed_target_user = User(uid=uid,
                               username=username,
@@ -118,6 +118,17 @@ def create_user_obj(target_user: instagrapi.types.User) -> User:
                               profile_image_path=profile_image_path)
 
     return parsed_target_user
+
+
+def users_are_different(user1: User, user2: User) -> bool:
+    """
+    Compare two user objects and return True if they are different in any way.
+
+    :param user1: First user object
+    :param user2: Second user object
+    :return: Boolean indicating if the users are different
+    """
+    return user1.__dict__ != user2.__dict__
 
 
 class InstaMon:
@@ -170,7 +181,10 @@ class InstaMon:
             first_run = False
             target_user = self.get_user_info(target_username=TARGET_USERNAME)
             new_target_user = create_user_obj(target_user=target_user)
-            insert_user(new_target_user)
+            last_user = get_last_user_info()
+
+            if last_user is None or users_are_different(new_target_user, last_user):
+                insert_user(new_target_user)
 
             logger.info('Run completed!')
 
