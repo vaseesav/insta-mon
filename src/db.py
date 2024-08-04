@@ -4,6 +4,7 @@ import logging
 import sqlite3
 import threading
 import time
+from typing import Optional
 
 from src.config import config
 from src.data_models import User
@@ -249,3 +250,35 @@ def update_post(post) -> None:
         raise ValueError("Unsupported post type")
 
     db_connection().commit()
+
+
+def get_last_user_info() -> Optional[User]:
+    """
+       Function that gets the latest user entry.
+       """
+    conn = db_connection()
+    result = conn.execute(
+        """
+        SELECT *
+        FROM User
+        ORDER BY id DESC
+        LIMIT 1;
+        """
+    )
+
+    last_entry = result.fetchone()
+
+    if last_entry:
+        user = User(
+            uid=last_entry[1],
+            username=last_entry[2],
+            name=last_entry[3],
+            bio=last_entry[4],
+            post_amount=last_entry[5],
+            follower_amount=last_entry[6],
+            follows_amount=last_entry[7],
+            profile_image_path=last_entry[8]
+        )
+        return user
+
+    return None
