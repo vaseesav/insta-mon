@@ -6,6 +6,7 @@ import threading
 import time
 from typing import Optional
 
+import src
 from src.config import config
 from src.data_models import User
 from src.data_models.post.imagepost import ImagePost
@@ -281,5 +282,35 @@ def get_last_user_info() -> Optional[User]:
             profile_image_path=last_entry[8]
         )
         return user
+
+    return None
+
+
+def get_last_post_info() -> Optional[object]:
+    """
+       Function that gets the latest post-entry.
+       """
+    conn = db_connection()
+    result = conn.execute(
+        """
+        SELECT *
+        FROM Post
+        ORDER BY id DESC
+        LIMIT 1;
+        """
+    )
+
+    last_entry = result.fetchone()
+
+    if last_entry:
+        post = src.data_models.post.Post(
+            post_id=last_entry[1],
+            post_type=last_entry[2],
+            media_path=last_entry[3],
+            description=last_entry[4],
+            like_amount=last_entry[5],
+            comment_amount=last_entry[6],
+        )
+        return post
 
     return None
