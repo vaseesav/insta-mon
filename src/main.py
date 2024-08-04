@@ -175,9 +175,10 @@ class InstaMon:
 
         try:
             if ACCOUNT_USERNAME and ACCOUNT_PASSWORD:
-                self.client.login(ACCOUNT_USERNAME, ACCOUNT_PASSWORD)
+                self.client.login(username=ACCOUNT_USERNAME, password=ACCOUNT_PASSWORD)
             elif ACCOUNT_USERNAME and ACCOUNT_PASSWORD and SECOND_FACTOR_CODE:
-                self.client.login(ACCOUNT_USERNAME, ACCOUNT_PASSWORD, SECOND_FACTOR_CODE)
+                self.client.login(username=ACCOUNT_USERNAME, password=ACCOUNT_PASSWORD,
+                                  verification_code=SECOND_FACTOR_CODE)
         except instagrapi.exceptions.BadPassword as password_error:
             logger.error("The password is wrong: %s", password_error)
         except instagrapi.exceptions.ReloginAttemptExceeded as exceeded_error:
